@@ -1,0 +1,171 @@
+{
+	"objName": "Stage",
+	"variables": [{
+			"name": "_Ret",
+			"value": 0,
+			"isPersistent": false
+		},
+		{
+			"name": "_r1",
+			"value": "",
+			"isPersistent": false
+		},
+		{
+			"name": "_r2",
+			"value": "",
+			"isPersistent": false
+		},
+		{
+			"name": "_iter1",
+			"value": 1,
+			"isPersistent": false
+		},
+		{
+			"name": "_brk",
+			"value": 0,
+			"isPersistent": false
+		}],
+	"sounds": [{
+			"soundName": "pop",
+			"soundID": 0,
+			"md5": "83a9787d4cb6f3b7632b4ddfebf74367.wav",
+			"sampleCount": 258,
+			"rate": 11025,
+			"format": ""
+		}],
+	"costumes": [{
+			"costumeName": "backdrop1",
+			"baseLayerID": 2,
+			"baseLayerMD5": "739b5e2a2435f6e1ec2993791b423146.png",
+			"bitmapResolution": 1,
+			"rotationCenterX": 240,
+			"rotationCenterY": 180
+		}],
+	"currentCostumeIndex": 0,
+	"penLayerMD5": "5c81a336fab8be57adc039a8a2b33ca9.png",
+	"penLayerID": 0,
+	"tempoBPM": 60,
+	"videoAlpha": 0.5,
+	"children": [{
+			"objName": "Sprite1",
+			"scripts": [[46.6,
+					80.45,
+					[["procDef", "split_s %s", ["string1"], [""], false],
+						["setVar:to:", "_iter1", 0],
+						["setVar:to:", "_r1", ""],
+						["setVar:to:", "_r2", ""],
+						["doUntil",
+							["|",
+								["=", ["readVariable", "_iter1"], ["stringLength:", ["getParam", "string1", "r"]]],
+								["=", ["readVariable", "_brk"], "1"]],
+							[["changeVar:by:", "_iter1", 1],
+								["doIf",
+									["=", ["letter:of:", ["readVariable", "_iter1"], ["getParam", "string1", "r"]], ":"],
+									[["setVar:to:", "_brk", "1"]]]]]]]],
+			"sounds": [{
+					"soundName": "pop",
+					"soundID": 0,
+					"md5": "83a9787d4cb6f3b7632b4ddfebf74367.wav",
+					"sampleCount": 258,
+					"rate": 11025,
+					"format": ""
+				}],
+			"costumes": [{
+					"costumeName": "costume1",
+					"baseLayerID": 1,
+					"baseLayerMD5": "d36f6603ec293d2c2198d3ea05109fe0.png",
+					"bitmapResolution": 2,
+					"rotationCenterX": 0,
+					"rotationCenterY": 0
+				}],
+			"currentCostumeIndex": 0,
+			"scratchX": 36,
+			"scratchY": 14,
+			"scale": 1,
+			"direction": 90,
+			"rotationStyle": "normal",
+			"isDraggable": false,
+			"indexInLibrary": 1,
+			"visible": true,
+			"spriteInfo": {
+			}
+		},
+		{
+			"target": "Stage",
+			"cmd": "getVar:",
+			"param": "_Ret",
+			"color": 15629590,
+			"label": "_Ret",
+			"mode": 1,
+			"sliderMin": 0,
+			"sliderMax": 100,
+			"isDiscrete": true,
+			"x": 5,
+			"y": 5,
+			"visible": true
+		},
+		{
+			"target": "Stage",
+			"cmd": "getVar:",
+			"param": "_r1",
+			"color": 15629590,
+			"label": "_r1",
+			"mode": 1,
+			"sliderMin": 0,
+			"sliderMax": 100,
+			"isDiscrete": true,
+			"x": 5,
+			"y": 32,
+			"visible": true
+		},
+		{
+			"target": "Stage",
+			"cmd": "getVar:",
+			"param": "_r2",
+			"color": 15629590,
+			"label": "_r2",
+			"mode": 1,
+			"sliderMin": 0,
+			"sliderMax": 100,
+			"isDiscrete": true,
+			"x": 5,
+			"y": 59,
+			"visible": true
+		},
+		{
+			"target": "Stage",
+			"cmd": "getVar:",
+			"param": "_iter1",
+			"color": 15629590,
+			"label": "_iter1",
+			"mode": 1,
+			"sliderMin": 0,
+			"sliderMax": 100,
+			"isDiscrete": true,
+			"x": 5,
+			"y": 86,
+			"visible": true
+		},
+		{
+			"target": "Stage",
+			"cmd": "getVar:",
+			"param": "_brk",
+			"color": 15629590,
+			"label": "_brk",
+			"mode": 1,
+			"sliderMin": 0,
+			"sliderMax": 100,
+			"isDiscrete": true,
+			"x": 5,
+			"y": 113,
+			"visible": true
+		}],
+	"info": {
+		"flashVersion": "WIN 32,0,0,182",
+		"spriteCount": 1,
+		"videoOn": false,
+		"swfVersion": "v461",
+		"userAgent": "Scratch 2.0 Offline Editor",
+		"scriptCount": 1
+	}
+}
