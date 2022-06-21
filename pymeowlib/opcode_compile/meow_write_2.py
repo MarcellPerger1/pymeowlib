@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from .opcode_util import OPS
 
 
-ARGSPEC_RE = re.compile(r'(?:%%)*%(\w)')
 
 
 class PyWriter:
@@ -73,53 +72,6 @@ class PyParser:
                 pass
             elif opc == OPS.POP_TOP:
                 pass
-
-class ScriptsRoot:
-    def __init__(self):
-        self.scripts=[]
-    
-    def add(self, script):
-        self.scripts.append(script)
-
-
-class BlockContainer(ABC):
-    @abstractmethod
-    def add(self, *blocks):
-        pass
-
-
-class DataContainer(BlockContainer):
-    """Class implmenting utils for adding to BlockContainers
-    
-    --- USAGE ---
-    
-    class ...(DataContainer):
-    
-        def __init__(self, ...):
-    
-            data = ... # [compute initial `data` value using args]
-            super().__init__(data)"""
-    @abstractmethod
-    def __init__(self, data):
-        self.data = data
-    
-    def add(self, *blocks):
-        self.data.extend(blocks)
-
-class ProcScript(DataContainer):
-    def __init__(self, spec, argNames, defaults=None, atomic=False):
-        super().__init__(initProcScript(spec, argNames, defaults, atomic))
-
-
-TYPE_DEFAULTS = {'n': 0, 's': "", 'b': True, }
-
-def initProcScript(spec, argNames, defaults=None, atomic=False):
-    if(defaults is None):
-        defaults = [TYPE_DEFAULTS[m[1]] for m in ARGSPEC_RE.findall(spec)]
-    if len(defaults) != len(argNames):
-        import warnings
-        warnings.warn(SyntaxWarning("no. defaults doesn't match no. args"))
-    return [[spec, argNames, defaults, atomic]]  #.append extra smts
 
 
 def addBlock(target, block):
