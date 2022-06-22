@@ -10,9 +10,27 @@ class ScriptsRoot:
 
 
 class BlockContainer(ABC):
+    data: list
+
     @abstractmethod
     def add(self, *blocks):
         pass
+
+class ContainerProxy(BlockContainer):
+    def __init__(self, getter, setter):
+        self.getter = getter
+        self.setter = setter
+    
+    def add(self, *blocks):
+        self.data.extend(*blocks)
+
+    @property
+    def data(self):
+        return self.getter()
+
+    @data.setter
+    def data(self, value):
+        self.setter(value)
 
 
 class DataContainer(BlockContainer):
