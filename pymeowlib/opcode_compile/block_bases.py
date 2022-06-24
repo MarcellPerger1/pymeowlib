@@ -14,7 +14,7 @@ class NamedBlock:
         self.name = name
 
 
-class BaseNamedBlock:
+class BaseNamedBlock(NamedBlock):
     name: str = None
     
     def __init__(self):
