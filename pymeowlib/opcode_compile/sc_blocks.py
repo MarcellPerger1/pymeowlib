@@ -47,12 +47,13 @@ class BaseCBlock(AnyCBlock):
         super().__init__(self.name, cond, blocks)
 
 
-class IfBlock(BlockContainer):
-    def __init__(self, cond):
-        self.data = ["doIf", cond, []]
+class IfBlock(BaseCBlock):
+    name = "DoIf"
 
-    def add(self, *blocks):
-        self.data[2].extend(blocks)
+
+class UntilBlock(BaseCBlock):
+    name = "doUntil"
+
 
 
 def _listitem_proxy(target, item):
@@ -77,11 +78,6 @@ class IfElseBlock(BlockContainer):
         self.add(*blocks, target='else')
 
 
-class UntilBlock(BlockContainer):
-    def __init__(self, cond):
-        self.data = ["doUntil", cond, []]
 
-    def add(self, *blocks):
-        self.data[2].extend(blocks)
 
 
