@@ -9,6 +9,20 @@ class ScriptsRoot:
         self.scripts.append(script)
 
 
+class NamedBlock:
+    def __init__(self, name):
+        self.name = name
+
+
+class BaseNamedBlock:
+    name: str = None
+    
+    def __init__(self):
+        if self.name is None:
+            raise AttributeError("Subclasses must provide .name, ideally on class")
+        super().__init__(self.name)
+
+
 class BlockContainer(ABC):
     data: list
 
