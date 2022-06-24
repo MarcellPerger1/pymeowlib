@@ -30,7 +30,11 @@ class ContainerProxy(BlockContainer):
 
     @data.setter
     def data(self, value):
-        self.setter(value)
+        if self.setter is not None:
+            self.setter(value)
+        else:
+            self.data.clear()
+            self.data.extend(value)
 
 
 class DataContainer(BlockContainer):

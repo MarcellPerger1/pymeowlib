@@ -29,6 +29,22 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
     return [[spec, argNames, defaults, atomic]]  #.append extra smts
 
 
+class AnyCBlock(BlockContainer):
+    def __init__(self, name, cond):
+        self.name = name
+        self.data = [name, cond, []]
+
+    def add(self, *blocks):
+        self.data[2].extend(blocks)
+
+class BaseCBlock(AnyCBlock):
+    name: str = None
+    def __init__(self, cond):
+        if self.name is None:
+            raise AttributeError("Subclasses must provide .name, ideally on class")
+        super().__init__(self.name, cond)
+
+
 class IfBlock(BlockContainer):
     def __init__(self, cond):
         self.data = ["doIf", cond, []]
@@ -57,3 +73,13 @@ class IfElseBlock(BlockContainer):
 
     def add_else(self, *blocks):
         self.add(*blocks, target='else')
+
+
+class UntilBlock(BlockContainer):
+    def __init__(self, cond):
+        self.data = ["doUntil", cond, []]
+
+    def add(self, *blocks):
+        self.data[2].extend(blocks)
+
+
