@@ -30,19 +30,21 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
 
 
 class AnyCBlock(BlockContainer):
-    def __init__(self, name, cond):
+    def __init__(self, name, cond, blocks=()):
         self.name = name
-        self.data = [name, cond, []]
+        self.data = [self.name, cond, []]
+        self.add(blocks)
 
     def add(self, *blocks):
         self.data[2].extend(blocks)
 
 class BaseCBlock(AnyCBlock):
     name: str = None
-    def __init__(self, cond):
+    
+    def __init__(self, cond, blocks=()):
         if self.name is None:
             raise AttributeError("Subclasses must provide .name, ideally on class")
-        super().__init__(self.name, cond)
+        super().__init__(self.name, cond, blocks)
 
 
 class IfBlock(BlockContainer):
