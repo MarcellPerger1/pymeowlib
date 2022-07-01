@@ -1,7 +1,7 @@
 import re
 import operator as op
 
-from .block_bases import BlockContainer, ContainerProxy
+from .block_bases import BlockContainer, ContainerProxy, NamedBlock, BaseNamedBlock
 
 ARGSPEC_RE = re.compile(r'(?:%%)*%(\w)')
 TYPE_DEFAULTS = {
@@ -29,9 +29,8 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
     return [[spec, argNames, defaults, atomic]]  #.append extra smts
 
 
-class AnyCBlock(BlockContainer):
-    def __init__(self, name, cond, blocks=()):
-        self.name = name
+class LateCBlockMixin:
+    def __init__(self, cond, blocks=()):
         self.data = [self.name, cond, []]
         self.add(blocks)
 
@@ -39,13 +38,34 @@ class AnyCBlock(BlockContainer):
         self.data[2].extend(blocks)
 
 
-class BaseCBlock(AnyCBlock):
-    name: str = None
-    
+class AnyCBlock(NamedBlock, LateCBlockMixin):
+    def __init__(self, name, cond, blocks=()):
+        NamedBlock.__init__(self, name)
+        LateCBlockMixin.__init__(self, cond, blocks)
+
+
+class BaseCBlock(BaseNamedBlock, LateCBlockMixin):
     def __init__(self, cond, blocks=()):
-        if self.name is None:
-            raise AttributeError("Subclasses must provide .name, ideally on class")
-        super().__init__(self.name, cond, blocks)
+        BaseNamedBlock.__init__(self)
+        LateCBlockMixin.__init__(self, cond, blocks)
+
+# class AnyCBlock(NamedBlock):
+#     def __init__(self, name, cond, blocks=()):
+#         super().__init__(name)
+#         self.data = [self.name, cond, []]
+#         self.add(blocks)
+
+#     def add(self, *blocks):
+#         self.data[2].extend(blocks)
+
+
+# class BaseCBlock(AnyCBlock):
+#     name: str = None
+    
+#     def __init__(self, cond, blocks=()):
+#         if self.name is None:
+#             raise AttributeError("Subclasses must provide .name, ideally on class")
+#         super().__init__(self.name, cond, blocks)
 
 
 class IfBlock(BaseCBlock):
