@@ -74,24 +74,3 @@ decor def generic(target: BaseClasses, for cls):
 @generic
 class ...
 ```
-
-
-## old Overly compliicated one:
-```python
-class Named:
-    def __init__(self, name): ...
-class NamedCls(Named):
-    abstract cls name: str
-    def __init__(self): 
-        self.name = cls.name!
-abstract class BlockWithData:
-    abstract inst data: list
-class AnyBlock(Named):
-    def __init__(self, name, *args):
-        Named.__init__(name)
-        self.data = [self.name, *args]
-class BlockCls(NamedCls, AnyBlock):
-    def __init__(self, *args):
-        NamedCls.__init__()
-        ANyBlock.__init__()
-```
