@@ -72,7 +72,7 @@ decor def generic(target: BaseClasses, for cls):
 ### Generic block classes
 ```python
 @generic
-class 
+class ...
 ```
 
 
