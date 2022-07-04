@@ -127,10 +127,6 @@ class IfElseBlock(IfBlock):
     def add_else(self, *blocks):
         self.add(*blocks, target='else')
 
-# new
-# ==========
-# old
-
 
 class ProcScript(BlockContainer):
     def __init__(self, spec, argNames, defaults=None, atomic=False):

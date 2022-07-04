@@ -9,20 +9,6 @@ class ScriptsRoot:
         self.scripts.append(script)
 
 
-class NamedBlock:
-    def __init__(self, name):
-        self.name = name
-
-
-class BaseNamedBlock(NamedBlock):
-    name: str = None
-    
-    def __init__(self):
-        if self.name is None:
-            raise AttributeError("Subclasses must provide .name, ideally on class")
-        super().__init__(self.name)
-
-
 class BlockContainer(ABC):
     data: list
 
@@ -49,22 +35,3 @@ class ContainerProxy(BlockContainer):
         else:
             self.data.clear()
             self.data.extend(value)
-
-
-class DataContainer(BlockContainer):
-    """Class implmenting utils for adding to BlockContainers
-    
-    --- USAGE ---
-    
-    class ...(DataContainer):
-    
-        def __init__(self, ...):
-    
-            data = ... # [compute initial `data` value using args]
-            super().__init__(data)"""
-    @abstractmethod
-    def __init__(self, data):
-        self.data = data
-    
-    def add(self, *blocks):
-        self.data.extend(blocks)
