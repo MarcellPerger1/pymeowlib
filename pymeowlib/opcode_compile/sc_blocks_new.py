@@ -49,18 +49,38 @@ class ConditionalCBlock(CBlock):
     def add(self, *blocks):
         self.data[2].extend(blocks)
 
+
 # concrete classes
-pass
 class ForeverBlock(CBlock):
     name = "doForever"
 
-    def __init__(self, blocks):
+    def __init__(self, blocks=()):
         super().__init__([])
         self.add(*blocks)
 
-        def add(self, *blocks):
-            self.data[0].extend(blocks)
+    def add(self, *blocks):
+        self.data[1].extend(blocks)
 
+
+class IfBlock(ConditionalCBlock):
+    name = "doIf"
+
+
+class UntilBlock(ConditionalCBlock):
+    name = "doUntil"
+
+
+class IfElseBlock(IfBlock):
+    name = "doIfElse"
+
+    def __init__(self, cond, if_=(), else_=()):
+        super(ConditionalCBlock, self).__init__(cond, [], [])
+
+    def add(self, *blocks, target="if"):
+        if target=="if":
+            super().add(*blocks)
+        else:
+            self.data[3].extend(blocks)
 
 # new
 # ==========
@@ -85,25 +105,25 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
     return [[spec, argNames, defaults, atomic]]  #.append extra smts
 
 
-class LateCBlockMixin:
-    def __init__(self, cond, blocks=()):
-        self.data = [self.name, cond, []]
-        self.add(blocks)
+# class LateCBlockMixin:
+#     def __init__(self, cond, blocks=()):
+#         self.data = [self.name, cond, []]
+#         self.add(blocks)
 
-    def add(self, *blocks):
-        self.data[2].extend(blocks)
-
-
-class AnyCBlock(NamedBlock, LateCBlockMixin):
-    def __init__(self, name, cond, blocks=()):
-        NamedBlock.__init__(self, name)
-        LateCBlockMixin.__init__(self, cond, blocks)
+#     def add(self, *blocks):
+#         self.data[2].extend(blocks)
 
 
-class BaseCBlock(BaseNamedBlock, LateCBlockMixin):
-    def __init__(self, cond, blocks=()):
-        BaseNamedBlock.__init__(self)
-        LateCBlockMixin.__init__(self, cond, blocks)
+# class AnyCBlock(NamedBlock, LateCBlockMixin):
+#     def __init__(self, name, cond, blocks=()):
+#         NamedBlock.__init__(self, name)
+#         LateCBlockMixin.__init__(self, cond, blocks)
+
+
+# class BaseCBlock(BaseNamedBlock, LateCBlockMixin):
+#     def __init__(self, cond, blocks=()):
+#         BaseNamedBlock.__init__(self)
+#         LateCBlockMixin.__init__(self, cond, blocks)
 
 # class AnyCBlock(NamedBlock):
 #     def __init__(self, name, cond, blocks=()):
@@ -124,12 +144,12 @@ class BaseCBlock(BaseNamedBlock, LateCBlockMixin):
 #         super().__init__(self.name, cond, blocks)
 
 
-class IfBlock(BaseCBlock):
-    name = "DoIf"
+# class IfBlock(BaseCBlock):
+#     name = "DoIf"
 
 
-class UntilBlock(BaseCBlock):
-    name = "doUntil"
+# class UntilBlock(BaseCBlock):
+#     name = "doUntil"
 
 
 
