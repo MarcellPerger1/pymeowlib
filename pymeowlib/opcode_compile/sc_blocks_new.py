@@ -22,6 +22,42 @@ class BlockContainer(ScratchBlock, ABC):
         pass
 
 
+
+class ContainerProxy(BlockContainer):
+    def __init__(self, getter, setter=None):
+        self.getter = getter
+        # if the user is able to provide a setter,
+        # they should as the default setter implementation
+        # is not ideal (clearing, then extending) as it 
+        # doesn't preserve referential identity, this is undesirable
+        # and has bad complexity (n is len(new), m is len(old)):
+        # it is O(n) when not considring the 
+        #   decref needed for each item of the list when clearing
+        # it is O(n+m) with the coefficient of m being **tiny** 
+        #   when considering this small technicallity
+        self.setter = setter
+    
+    def add(self, *blocks):
+        self.data.extend(*blocks)
+
+    @property
+    def data(self):
+        return self.getter()
+
+    @data.setter
+    def data(self, value):
+        if self.setter is not None:
+            self.setter(value)
+        else:
+            data = self.data  # only call getter once
+            data.clear()
+            data.extend(value)
+
+def _listitem_proxy(target, item):
+    return ContainerProxy(lambda: target[item],
+                          lambda v: op.setitem(target, item, v))
+
+
 class Named:
     name: str
     def __init__(self, name=None):
@@ -73,14 +109,23 @@ class UntilBlock(ConditionalCBlock):
 class IfElseBlock(IfBlock):
     name = "doIfElse"
 
+    # todo _listitem_proxy !!
     def __init__(self, cond, if_=(), else_=()):
         super(ConditionalCBlock, self).__init__(cond, [], [])
+        self.if_ = _listitem_proxy(self.data, 2)
+        self.else_ = _listitem_proxy(self.data, 3)
 
     def add(self, *blocks, target="if"):
         if target=="if":
             super().add(*blocks)
         else:
             self.data[3].extend(blocks)
+
+    def add_if(self, *blocks):
+        self.add(*blocks, target='if')
+
+    def add_else(self, *blocks):
+        self.add(*blocks, target='else')
 
 # new
 # ==========
@@ -153,26 +198,9 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
 
 
 
-def _listitem_proxy(target, item):
-    return ContainerProxy(lambda: target[item],
-                          lambda v: op.setitem(target, item, v))
 
 
-class IfElseBlock(BlockContainer):
-    def __init__(self, cond):
-        self.data = ["doIfElse", cond, [], []]
-        self.if_ = _listitem_proxy(self.data, 2)
-        self.else_ = _listitem_proxy(self.data, 3)
-
-    def add(self, *blocks, target="if"):
-        target_list = self.data[2] if target.lower() == 'if' else self.data[3]
-        target_list.extend(blocks)
-
-    def add_if(self, *blocks):
-        self.add(*blocks, target='if')
-
-    def add_else(self, *blocks):
-        self.add(*blocks, target='else')
+    
 
 
 
