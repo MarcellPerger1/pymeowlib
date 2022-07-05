@@ -119,7 +119,6 @@ class UntilBlock(ConditionalCBlock):
 class IfElseBlock(IfBlock):
     name = "doIfElse"
 
-    # todo _listitem_proxy !!
     def __init__(self, cond, if_=(), else_=()):
         super(ConditionalCBlock, self).__init__(cond, [], [])
         self.if_ = _listitem_proxy(self.data, 2)
@@ -151,7 +150,7 @@ class ProcDefBlock(Block):
 
 def initProcDef(spec, argNames, defaults=None, atomic=False):
     if (defaults is None):
-        defaults = [TYPE_DEFAULTS[m[1]] for m in ARGSPEC_RE.findall(spec)]
+        defaults = [TYPE_DEFAULTS[m] for m in ARGSPEC_RE.findall(spec)]
     if len(defaults) != len(argNames):
         import warnings
         warnings.warn(SyntaxWarning("no. defaults doesn't match no. args"))
@@ -170,7 +169,7 @@ class ScriptBody(BlockContainer):
 
 
 class Script(BlockContainer):
-    def __init__(self, body, pos=(10, 10)):  # todo top=
+    def __init__(self, body, pos=(10, 10)):
         self.pos = self.x, self.y = pos
         self.data = [self.x, self.y, body]
 
