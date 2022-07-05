@@ -113,9 +113,11 @@
 	"videoAlpha": 0.5,
 	"children": [{
 			"objName": "Sprite1",
-			"scripts": [[546,
+			"scripts": [
+                [546,
 					136,
-					[["procDef", "glob_defined %s", ["key"], [""], true],
+					[
+                        ["procDef", "glob_defined %s", ["key"], [""], true],
 						["setVar:to:", "_iter1", 0],
 						["setVar:to:", "_brk", 0],
 						["doUntil",
@@ -128,7 +130,9 @@
 										["getLine:ofList:", ["-", ["*", ["readVariable", "_iter1"], 2], 1], "_G"],
 										["getParam", "key", "r"]],
 									[["setVar:to:", "_brk", "1"], ["setVar:to:", "_r1", "1"]]]]],
-						["doIf", ["=", ["readVariable", "_brk"], "0"], [["setVar:to:", "_r1", 0]]]]],
+						["doIf", ["=", ["readVariable", "_brk"], "0"], [["setVar:to:", "_r1", 0]]]
+                    ]
+                ],
 				[10,
 					10,
 					[["procDef", "split_s %s", ["string1"], [""], true],

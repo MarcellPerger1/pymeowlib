@@ -80,7 +80,8 @@ class CBlock(Block, ABC):
 
 class ConditionalCBlock(CBlock):
     def __init__(self, cond, blocks):
-        super()._init__(cond, blocks)
+        super()._init__(cond, [])
+        self.add(blocks)
 
     def add(self, *blocks):
         self.data[2].extend(blocks)
@@ -114,6 +115,8 @@ class IfElseBlock(IfBlock):
         super(ConditionalCBlock, self).__init__(cond, [], [])
         self.if_ = _listitem_proxy(self.data, 2)
         self.else_ = _listitem_proxy(self.data, 3)
+        self.add_if(if_)
+        self.add_else(else_)
 
     def add(self, *blocks, target="if"):
         if target=="if":
@@ -128,16 +131,16 @@ class IfElseBlock(IfBlock):
         self.add(*blocks, target='else')
 
 
-class ProcScript(BlockContainer):
+class ProcDefBlock(Block):
     def __init__(self, spec, argNames, defaults=None, atomic=False):
-        self.data = initProcScript(spec, argNames, defaults, atomic)
+        self.data = initProcDef(spec, argNames, defaults, atomic)
 
     def add(self, *blocks):
         self.data.extend(blocks)
         return self
 
 
-def initProcScript(spec, argNames, defaults=None, atomic=False):
+def initProcDef(spec, argNames, defaults=None, atomic=False):
     if (defaults is None):
         defaults = [TYPE_DEFAULTS[m[1]] for m in ARGSPEC_RE.findall(spec)]
     if len(defaults) != len(argNames):
@@ -145,3 +148,20 @@ def initProcScript(spec, argNames, defaults=None, atomic=False):
         warnings.warn(SyntaxWarning("no. defaults doesn't match no. args"))
     return [[spec, argNames, defaults, atomic]]  #.append extra smts
 
+
+class ScriptBody(BlockContainer):
+    def __init__(self, top, *blocks):
+        self.data = [self.top]
+        self.add(*blocks)
+
+    def add(self, *blocks):
+        self.data.extend(blocks)
+
+class Script(BlockContainer):
+    def __init__(self, pos=(10, 10), blocks=()):
+        self.x, self.y = pos
+        self.data = [self.x, self.y, []]
+        self.add(*blocks)
+
+    def add(self, *blocks):
+        self.data[2].extend(blocks)
