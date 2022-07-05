@@ -155,7 +155,8 @@ def initProcDef(spec, argNames, defaults=None, atomic=False):
     if len(defaults) != len(argNames):
         import warnings
         warnings.warn(SyntaxWarning("no. defaults doesn't match no. args"))
-    return [spec, argNames, defaults, atomic]  #.append extra smts
+    # this is just for the define block at the top
+    return [spec, argNames, defaults, atomic]
 
 
 class ScriptBody(BlockContainer):
