@@ -102,6 +102,11 @@ class Block(Named, ScratchBlock):  # impl ScratchBlock
         self.data = [self.name, self.args]
 
 
+@generic
+class AnyBlock(Block):
+    pass
+
+
 class CBlock(Block, ABC):
     @abstractmethod
     def add(self, *blocks):
