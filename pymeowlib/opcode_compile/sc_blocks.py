@@ -63,6 +63,12 @@ def _listitem_proxy(target, item):
     return ContainerProxy(lambda: target[item],
                           lambda v: op.setitem(target, item, v))
 
+def generic(target):
+    def decor(cls):
+        assert issubclass(cls, target) and cls is not target
+        def init(self, ...):
+            ...
+
 
 class Named:
     name: str
