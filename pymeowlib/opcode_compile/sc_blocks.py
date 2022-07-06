@@ -66,7 +66,7 @@ def _listitem_proxy(target, item):
 def generic(target):
     def decor(cls):
         assert issubclass(cls, target) and cls is not target
-        def init(self, ...):
+        def init(self, ): # ...
             ...
 
 
