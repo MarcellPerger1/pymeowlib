@@ -105,5 +105,5 @@ ignoredPackages = ["unit_tests"]
   # Enable searching packages from the sidebar.
   packageSearch = true
   # Enable guessing what packages are needed from the code.
-  guessImports = true
+  # guessImports = true
 
