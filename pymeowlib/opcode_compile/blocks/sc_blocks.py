@@ -11,6 +11,7 @@ TYPE_DEFAULTS = {
     'b': True,
 }
 
+# loops
 class ForeverBlock(BaseCBlock):
     name = "doForever"
 
@@ -22,12 +23,17 @@ class ForeverBlock(BaseCBlock):
         self.data[1].extend(blocks)
 
 
-class IfBlock(BaseCondCBlock):
-    name = "doIf"
-
-
 class UntilBlock(BaseCondCBlock):
     name = "doUntil"
+
+
+class RepeatBlock(BaseCondCBlock):
+    name = "doRepeat"
+
+
+# conditions
+class IfBlock(BaseCondCBlock):
+    name = "doIf"
 
 
 class IfElseBlock(IfBlock):
@@ -53,6 +59,7 @@ class IfElseBlock(IfBlock):
         self.data[3].extend(blocks)
 
 
+# other (TODO)
 class ProcDefBlock(BaseBlock):
     def __init__(self, spec, argNames, defaults=None, atomic=False):
         self.data = initProcDef(spec, argNames, defaults, atomic)
