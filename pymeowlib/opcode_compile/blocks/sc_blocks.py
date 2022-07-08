@@ -1,7 +1,6 @@
 import re
-from .block_proxy import ListitemProxy
-from .block_bases import BlockContainer
-from .block_types import BaseCBlock, BaseCondCBlock, BaseBlock
+from .util import ListitemProxy
+from .bases import BlockContainer, BaseCBlock, BaseCondCBlock, BaseBlock
 
 
 ARGSPEC_RE = re.compile(r'(?:%%)*%(\w)')

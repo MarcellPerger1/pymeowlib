@@ -1,6 +1,6 @@
 import operator as op
 
-from .block_bases import BlockContainer
+from ..bases import BlockContainer
 
 
 

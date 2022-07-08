@@ -1,4 +1,4 @@
-from .block_bases import ScratchBlock
+from ..bases import ScratchBlock
 
 
 def generic(clsarg=None, target=None):

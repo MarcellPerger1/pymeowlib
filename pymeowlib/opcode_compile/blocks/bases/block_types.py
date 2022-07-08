@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from .block_bases import ScratchBlock
-from .generic_block import generic
+from ..util.generic_block import generic
 
 
 class Named:
