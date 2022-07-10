@@ -40,7 +40,10 @@ class AnyBlock(BaseBlock):
 
 @generic
 class CBlock(BaseCBlock):
-    pass
+    def add(self, *blocks):
+        raise NotImplementedError(".add is not implemented for custom C blocks, "
+                                  "consider making a subclass and implementing it there")
+
 
 @generic
 class CondCBlock(BaseCondCBlock):
