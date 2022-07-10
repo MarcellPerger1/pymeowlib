@@ -27,7 +27,7 @@ class BaseCBlock(BaseBlock, ABC):
 
 class BaseCondCBlock(BaseCBlock):
     def __init__(self, cond, blocks):
-        super()._init__(cond, [])
+        super().__init__(cond, [])
         self.add(blocks)
 
     def add(self, *blocks):
