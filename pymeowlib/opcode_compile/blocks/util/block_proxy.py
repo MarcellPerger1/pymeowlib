@@ -37,7 +37,8 @@ class ContainerProxy(BlockContainer):
         data.clear()
         data.extend(value)
 
-class ListitemProxy(BlockContainer):
+
+class ListitemProxy(ContainerProxy):
     def __init__(self, target, item):
         super().__init__(lambda: target[item],
                          lambda v: op.setitem(target, item, v))
