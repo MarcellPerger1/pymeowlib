@@ -6,7 +6,7 @@
 class Named:
     name: str
     def __init__(self):
-        if self.name is not None:
+        if self.name is None:
             raise ValueError("name must not be None")
         self.name = self.name  # set on instance
 
