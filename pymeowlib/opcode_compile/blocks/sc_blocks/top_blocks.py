@@ -11,8 +11,10 @@ TYPE_DEFAULTS = {
 
 
 class ProcDefBlock(BaseBlock):
+    name = "procDef"
+
     def __init__(self, spec, argNames, defaults=None, atomic=False):
-        self.data = initProcDef(spec, argNames, defaults, atomic)
+        super().__init__(*initProcDef(spec, argNames, defaults, atomic))
 
     def add(self, *blocks):
         self.data.extend(blocks)
