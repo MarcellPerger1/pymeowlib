@@ -1,7 +1,6 @@
 import re
 from ..bases import BaseBlock
 
-
 ARGSPEC_RE = re.compile(r'(?:%%)*%(\w)')
 TYPE_DEFAULTS = {
     'n': 0,
@@ -13,20 +12,19 @@ TYPE_DEFAULTS = {
 class ProcDefBlock(BaseBlock):
     name = "procDef"
 
-    def __init__(self, spec, argNames, defaults=None, atomic=False):
-        super().__init__(*initProcDef(spec, argNames, defaults, atomic))
+    def __init__(self, spec, arg_names, defaults=None, atomic=False):
+        super().__init__(*init_proc_def(spec, arg_names, defaults, atomic))
 
     def add(self, *blocks):
         self.data.extend(blocks)
         return self
 
 
-def initProcDef(spec, argNames, defaults=None, atomic=False):
-    if (defaults is None):
+def init_proc_def(spec, arg_names, defaults=None, atomic=False):
+    if defaults is None:
         defaults = [TYPE_DEFAULTS[m] for m in ARGSPEC_RE.findall(spec)]
-    if len(defaults) != len(argNames):
+    if len(defaults) != len(arg_names):
         import warnings
         warnings.warn(SyntaxWarning("no. defaults doesn't match no. args"))
     # this is just for the define block at the top
-    return [spec, argNames, defaults, atomic]
-
+    return [spec, arg_names, defaults, atomic]

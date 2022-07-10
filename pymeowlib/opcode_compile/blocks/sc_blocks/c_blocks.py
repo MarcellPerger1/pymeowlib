@@ -1,6 +1,7 @@
 from ..bases import BaseCBlock, BaseCondCBlock
 from ..util import ListitemProxy
 
+
 class ForeverBlock(BaseCBlock):
     name = "doForever"
 

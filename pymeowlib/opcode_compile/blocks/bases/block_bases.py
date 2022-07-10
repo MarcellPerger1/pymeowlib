@@ -15,4 +15,3 @@ class BlockContainer(ScratchBlock, ABC):
     @abstractmethod
     def add(self, *blocks):
         pass
-

@@ -3,7 +3,6 @@ import operator as op
 from ..bases import BlockContainer
 
 
-
 class ContainerProxy(BlockContainer):
     def __init__(self, getter, setter=None):
         self.getter = getter
@@ -12,10 +11,10 @@ class ContainerProxy(BlockContainer):
         # is not ideal (clearing, then extending) as it
         # doesn't preserve referential identity, this is undesirable
         # and has bad complexity (n is len(new), m is len(old)):
-        #   it is O(n) when not considring the
+        #   it is O(n) when not considering the
         #     DECREF needed for each item of the list when clearing
         #   it is O(n+m) with the coefficient of m being **tiny**
-        #     when considering this small technicallity
+        #     when considering this small technicality
         self.setter = setter
 
     def add(self, *blocks):

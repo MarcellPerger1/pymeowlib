@@ -20,10 +20,12 @@ class BaseBlock(Named, ScratchBlock):  # impl ScratchBlock
         self.args = args
         self.data = [self.name, self.args]
 
+
 class BaseCBlock(BaseBlock, ABC):
     @abstractmethod
     def add(self, *blocks):
         pass
+
 
 class BaseCondCBlock(BaseCBlock):
     def __init__(self, cond, blocks):
@@ -37,6 +39,7 @@ class BaseCondCBlock(BaseCBlock):
 @generic
 class AnyBlock(BaseBlock):
     pass
+
 
 @generic
 class CBlock(BaseCBlock):
