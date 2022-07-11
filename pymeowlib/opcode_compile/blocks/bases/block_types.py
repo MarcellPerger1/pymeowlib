@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import overload
 
 from .block_bases import ScratchBlock
 from ..util.generic_block import generic
@@ -34,6 +35,13 @@ class BaseCondCBlock(BaseCBlock):
 
     def add(self, *blocks):
         self.data[2].extend(blocks)
+
+
+@overload
+class Block(BaseBlock):
+    def __init__(self, name: str, *args):
+        self.name = name
+        super().__init__(*args)
 
 
 @generic
