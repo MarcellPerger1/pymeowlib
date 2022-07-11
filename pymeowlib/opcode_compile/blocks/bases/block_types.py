@@ -11,7 +11,7 @@ class Named:
     def __init__(self, name=None):
         # guarantee that set on instance
         self.name = name or self.name
-        if self.name is not None:
+        if self.name is None:
             raise ValueError("name must not be None")
 
 
@@ -19,7 +19,7 @@ class BaseBlock(Named, ScratchBlock):  # impl ScratchBlock
     def __init__(self, *args):
         super().__init__()
         self.args = args
-        self.data = [self.name, self.args]
+        self.data = [self.name, *self.args]
 
 
 class BaseCBlock(BaseBlock, ABC):

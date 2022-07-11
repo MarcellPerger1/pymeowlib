@@ -12,6 +12,7 @@ def generic(clsarg=None, target=None):
         init.__name__ = "__init__"
         init.__qualname__ = cls.__qualname__ + "." + init.__name__
         cls.__init__ = init
+        return cls
     if clsarg is None:
         if target is not None:
             return decor

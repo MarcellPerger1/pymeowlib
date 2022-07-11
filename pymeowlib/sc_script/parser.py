@@ -47,7 +47,7 @@ class Parser:
         self.str_repl = StrReplacer(self.src).replace()
         if self.str_repl.new.count('!*') != len(self.str_repl.strings):
             raise SyntaxError("Invalid syntax: !* may not be used outside of strings")
-        for self.line in self.str_repl.new:
+        for self.line in self.str_repl.new.splitlines():
             self._handle_line()
 
     def _handle_line(self):
