@@ -37,7 +37,7 @@ class BaseCondCBlock(BaseCBlock):
 
 
 @generic
-class AnyBlock(BaseBlock):
+class Block(BaseBlock):
     pass
 
 
