@@ -69,7 +69,7 @@ class Parser:
     def _check_var_assign(self):
         m = IDENT_RE.fullmatch(self.left)
         if m:
-            self.target = 'var'
+            self.assign_type = 'var'
             self.ident = m[1]
             return True
 
@@ -79,7 +79,7 @@ class Parser:
     def _check_listitem_assign(self):
         m = LISTITEM_RE.fullmatch(self.left)
         if m:
-            self.target = 'list'
+            self.assign_type = 'list'
             self.ident, self.index = m[1], m[2]
             return True
 
@@ -87,8 +87,8 @@ class Parser:
         self.smt = Block("setLine:ofList:to:", int(self.index), self.ident, None)
 
     def _set_assign_target(self, target):
-        if self.target == 'var':
+        if self.assign_type == 'var':
             self.smt.data[2] = target
-        elif self.target == 'list':
+        elif self.assign_type == 'list':
             self.smt.data[3] = target
         assert False
