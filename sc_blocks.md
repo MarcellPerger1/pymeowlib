@@ -72,7 +72,7 @@
 | `hideAll` | Hide All Sprites |
 | `hideList:` | Hide List () |
 | `hideVariable:` | Hide Variable () |
-| `INCR_COUNT` | Incr Counter |
+| `INCR_COUNT` | Increment Counter |
 | `insert:at:ofList:` | Insert () at () of () |
 | `instrument:` | Set Instrument to () |
 | `isLoud` | Loud? |
