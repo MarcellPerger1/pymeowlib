@@ -8,6 +8,7 @@ from ..opcode_compile.blocks import Block
 STR_RE = re.compile(r'"((?:[^"\\]|\\.)*?)"')
 IDENT_RE = re.compile(r'([a-zA-Z_]\w*)')
 LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
+# this not work::
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
@@ -35,6 +36,8 @@ def parses(s: str):
 
 
 class Parser:
+    right: str
+    left: str
     line: str
 
     def __init__(self, s: str):
@@ -106,16 +109,10 @@ class Parser:
         if self.right == '!*':
             self.target = self._get_next_str()
             return
-        try:
-            self.target = int(self.right)
+        if self._check_int_rvalue():
             return
-        except ValueError:
-            pass
-        try:
-            self.target = float(self.right)
+        if self._check_float_rvalue():
             return
-        except ValueError:
-            pass
         raise SyntaxError("Unknown rvalue")
 
     def _get_next_str(self, inc=True):
@@ -123,6 +120,30 @@ class Parser:
         if inc:
             self.str_index += 1
         return s
+
+    def _check_int_rvalue(self):
+        if self._try_convert_to_target(int, self.right):
+            return True
+        if self._try_convert_with_base(self.right, 2, "0b"):
+            return True
+        if self._try_convert_with_base(self.right, 8, "0o"):
+            return True
+        if (self._try_convert_with_base(self.right, 16, "0x")
+                or self._try_convert_with_base(self.right, 16, "0h")):
+            return True
+
+    def _try_convert_with_base(self, s: str, base: int, prefix: str):
+        return s.startswith(prefix) and self._try_convert_to_target(int, s[2:], base)
+
+    def _try_convert_to_target(self, converter, *args):
+        try:
+            self.target = converter(*args)
+            return True
+        except ValueError:
+            pass
+
+    def _check_float_rvalue(self):
+        return self._try_convert_to_target(float, self.right)
 
 
 def _unescape(s: str):
