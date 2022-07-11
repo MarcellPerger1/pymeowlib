@@ -11,6 +11,7 @@ def nop(_arg=None):
 def pop_top(_arg=None):
     return [Block("deleteLine:ofList:", "1", "__STACK__")]
 
+
 @for_op(OPS.ROT_TWO)
 def rot_two(_arg=None):
     return ...
