@@ -42,8 +42,11 @@ class Parser:
 
     def parse(self):
         self._parse()
+        return self
 
     def _parse(self):
+        self.smts = []
+        self.str_index = 0
         self.str_repl = StrReplacer(self.src).replace()
         if self.str_repl.new.count('!*') != len(self.str_repl.strings):
             raise SyntaxError("Invalid syntax: !* may not be used outside of strings")
@@ -55,7 +58,8 @@ class Parser:
         self.line = self.line.strip()
         self.left, self.right = map(str.strip, self.line.split('='))
         self._handle_left()
-        ...
+        self._handle_right()
+        self.smts.append(self.smt)
 
     def _handle_left(self):
         if self._check_var_assign():
@@ -91,4 +95,35 @@ class Parser:
             self.smt.data[2] = target
         elif self.assign_type == 'list':
             self.smt.data[3] = target
-        assert False
+        else:
+            assert False
+
+    def _handle_right(self):
+        self._gen_assign_target()
+        self._set_assign_target(self.target)
+
+    def _gen_assign_target(self):
+        if self.right == '!*':
+            self.target = self._get_next_str()
+            return
+        try:
+            self.target = int(self.right)
+            return
+        except ValueError:
+            pass
+        try:
+            self.target = float(self.right)
+            return
+        except ValueError:
+            pass
+        raise SyntaxError("Unknown rvalue")
+
+    def _get_next_str(self, inc=True):
+        s = _unescape(self.str_repl.strings[self.str_index])
+        if inc:
+            self.str_index += 1
+        return s
+
+
+def _unescape(s: str):
+    return s.encode('raw_unicode_escape').decode('unicode_escape')
