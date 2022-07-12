@@ -58,10 +58,21 @@ class Parser:
     def _handle_line(self):
         self.smt: Optional[Block] = None
         self.line = self.line.strip()
-        self.left, self.right = map(str.strip, self.line.split('='))
+        if not self.line:
+            return
+        self._handle_assign()
+        self.smts.append(self.smt)
+
+    def _handle_assign(self):
+        self.assign_sides = map(str.strip, self.line.split('='))
+        if len(self.assign_sides) < 2:
+            return False
+        if len(self.assign_sides) > 2:
+            raise NotImplementedError("Multiple assignment has not been implemented yet")
+        self.left, self.right = self.assign_sides
         self._handle_left()
         self._handle_right()
-        self.smts.append(self.smt)
+        return True
 
     def _handle_left(self):
         if self._check_var_assign():
