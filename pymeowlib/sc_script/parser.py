@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import operator as op
 from typing import Optional
 
 from ..opcode_compile.blocks import Block
@@ -28,6 +29,58 @@ class StrReplacer:
         self.strings.append(contents)
         return '!*'
 
+
+class ParenMatcher:
+    paren_types = ['()', '[]', '{}']
+    open_parens = {s[0]: s[1] for s in paren_types}
+    close_parens = {s[1]: s[0] for s in paren_types}
+    
+    def __init__(self, s: str, sort_by: str = None, reverse=False):
+        self.orig = s
+        self.sort_by = sort_by
+        self.reverse = reverse
+
+    def match(self):
+        self._match()
+        return self
+
+    def _match(self):
+        self.out = []
+        self.paren_stack = []
+        self.i = 0
+        while self.i < len(self.orig):
+            self._handle_next_char()
+        self._sort_output()
+
+    def _sort_output(self):
+        if self.sort_by is None:
+            return
+        if self.sort_by == 'type':
+            self.sort_idx = 0
+        if self.sort_by == 'start':
+            self.sort_idx = 1
+        if self.sort_by == 'end':
+            self.sort_idx = 2
+        self.out.sort(key=op.itemgetter(self.sort_idx), reverse=self.reverse)
+
+    def _handle_next_char(self):
+        self.c = self.orig[self.i]
+        self._handle_char()
+        self.i += 1
+    
+    def _handle_char(self):
+        if self.c in self.open_parens:
+            self.paren_stack.append((self.c, self.i))
+            return
+        if self.c in self.close_parens:
+            tos = self.paren_stack.pop()
+            tos_c, tos_i = tos
+            expected = self.open_parens[tos_c]
+            if self.c == expected:
+                self.out.append((tos_c + self.c, tos_i, self.i))
+                return
+            raise ValueError(f"Unmatched paren: expected '{expected}', got '{self.c}'")
+            
 
 def parses(s: str):
     ...
@@ -123,7 +176,22 @@ class Parser:
             return
         if self._check_float_rvalue():
             return
+        if self.right.startswith("@"):
+            self._handle_raw_op()
         raise SyntaxError("Unknown rvalue")
+
+    def _handle_raw_op(self):
+        self.raw_op_str: str = self.right[1:]  # remove '@' prefix
+        self.raw_op_parts = map(str.split, self.raw_op_str.split('(', 1))
+        if len(self.raw_op_parts) == 0 or not self.raw_op_parts[0]:
+            raise SyntaxError("Raw operation requires name")
+        if len(self.raw_op_parts) == 1:
+            # no args, just name 
+            self.target = Block(self.raw_op_parts[0])
+        assert len(self.raw_op_parts) == 2
+        self.pmatcher = ParenMatcher(self.raw_op_str, 'start').match()
+        assert self.pmatcher.out[0][:2] == ('()', 0)
+        
 
     def _get_next_str(self, inc=True):
         s = _unescape(self.str_repl.strings[self.str_index])
