@@ -8,7 +8,6 @@ from ..opcode_compile.blocks import Block
 STR_RE = re.compile(r'"((?:[^"\\]|\\.)*?)"')
 IDENT_RE = re.compile(r'([a-zA-Z_]\w*)')
 LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
-# this not work::
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
@@ -147,4 +146,5 @@ class Parser:
 
 
 def _unescape(s: str):
+    # or encode with "latin-1", "backslashescape" ?
     return s.encode('raw_unicode_escape').decode('unicode_escape')
