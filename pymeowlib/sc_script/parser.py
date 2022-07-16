@@ -34,7 +34,7 @@ class ParenMatcher:
     paren_types = ['()', '[]', '{}']
     open_parens = {s[0]: s[1] for s in paren_types}
     close_parens = {s[1]: s[0] for s in paren_types}
-    
+
     def __init__(self, s: str, sort_by: str = None, reverse=False):
         self.orig = s.rstrip()
         self.sort_by = sort_by
@@ -73,7 +73,7 @@ class ParenMatcher:
         self.c = self.orig[self.i]
         self._handle_char()
         self.i += 1
-    
+
     def _handle_char(self):
         if self.c not in self.open_parens and self.c not in self.close_parens:
             return
@@ -91,7 +91,7 @@ class ParenMatcher:
             self.out.append((tos_c + self.c, tos_i, self.i))
             return
         raise ValueError(f"Unmatched paren: expected '{expected}', got '{self.c}'")
-            
+
 
 def parses(s: str):
     ...
@@ -204,8 +204,7 @@ class Parser:
         self.pmatcher = ParenMatcher(self.raw_op_args, 'start').match()
         assert self.pmatcher.out[0][:2] == ('()', 0)
         end = self.pmatcher.out[0][2]
-        self.raw_op_args = self.raw_op_args[:end+1]
-        
+        self.raw_op_args = self.raw_op_args[:end + 1]
         ...
 
     def _get_next_str(self, inc=True):
