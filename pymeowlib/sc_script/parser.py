@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from enum import auto, Enum
 import operator as op
 from typing import Optional
 
@@ -194,7 +193,7 @@ class Parser:
 
     def _handle_raw_op(self):
         self.raw_op_str: str = self.expr[1:]  # remove '@' prefix
-        self.raw_op_parts = map(str.split, self.raw_op_str.split('(', 1))
+        self.raw_op_parts = [s.strip() for s in self.raw_op_str.split('(', 1)]
         if len(self.raw_op_parts) == 0 or not self.raw_op_parts[0]:
             raise SyntaxError("Raw operation requires name")
         if len(self.raw_op_parts) == 1:
@@ -208,7 +207,6 @@ class Parser:
         self.raw_op_args = self.raw_op_args[:end+1]
         
         ...
-        
 
     def _get_next_str(self, inc=True):
         s = _unescape(self.str_repl.strings[self.str_index])
