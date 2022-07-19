@@ -13,6 +13,10 @@ if TYPE_CHECKING:
 
 
 class TokenType(UsesTokenizer, ABC):
+    invalid = False
+    """Does the generation of this token indicate a syntax error?
+    These tokens will only be tried after all else has failed"""
+
     def __init__(self, tokenizer: Tokenizer, token: Token):
         super().__init__(tokenizer)
         self.token = token

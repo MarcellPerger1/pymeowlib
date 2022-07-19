@@ -1,9 +1,7 @@
 import string
 
+from .const import IDENT_CHARS
 from .token import register_token, TokenType
-
-
-IDENT_CHARS = string.ascii_letters + string.digits + '_'
 
 
 @register_token
@@ -38,6 +36,8 @@ class WhitespaceToken(TokenType):
 
 @register_token
 class InvalidToken(TokenType):
+    invalid = True
+
     def do_start(self) -> bool:
         return True
 
