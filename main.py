@@ -1,6 +1,7 @@
 # noinspection PyUnresolvedReferences
 import pymeowlib
 import pymeowlib.sc_script.parser
+import pymeowlib.sc_script.main
 
 def parse(s):
     return [smt.get_data() for smt in pymeowlib.sc_script.parser.parses(s).smts]
@@ -16,3 +17,5 @@ def test():
         raise AssertionError("Test failed")
 
 test()
+
+pymeowlib.sc_script.main.main()

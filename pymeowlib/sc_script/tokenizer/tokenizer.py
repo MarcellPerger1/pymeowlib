@@ -5,6 +5,7 @@ from typing import Iterable
 from .state import State
 from .token import Token, TOKEN_TYPES, TokenType
 from .tokens import WhitespaceToken
+from .post_processors import POST_PROCESSORS
 
 
 class Tokenizer:
@@ -38,6 +39,11 @@ class Tokenizer:
             self.index += 1
         if self.token is not None:
             self.end_token()
+        self.call_post_processors()
+
+    def call_post_processors(self):
+        for p in POST_PROCESSORS:
+            self.tokens = p(self).process(self.tokens)
 
     def next_char(self):
         if self.token is None:

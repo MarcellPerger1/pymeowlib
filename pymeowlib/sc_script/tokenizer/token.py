@@ -87,6 +87,7 @@ class Token(UsesTokenizer):
             self.set_class(t)
         else:
             self.type = t
+        return self
 
     def set_class(self, c: Type[TokenType]):
         self.set_type(c(self.tokenizer, self))
