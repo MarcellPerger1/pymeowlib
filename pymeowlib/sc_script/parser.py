@@ -99,7 +99,7 @@ def parses(s: str):
 
 
 class Parser:
-    expr: str
+    expr_str: str
     left: str
     line: str
 
@@ -133,7 +133,7 @@ class Parser:
             return False
         if len(self.assign_sides) > 2:
             raise NotImplementedError("Multiple assignment has not been implemented yet")
-        self.left, self.expr = self.assign_sides
+        self.left, self.expr_str = self.assign_sides
         self._handle_left()
         self._handle_expr()
         return True
@@ -177,28 +177,28 @@ class Parser:
 
     def _handle_expr(self):
         self._gen_assign_target()
-        self._set_assign_target(self.target)
+        self._set_assign_target(self.expr_res)
 
     def _gen_assign_target(self):
-        if self.expr == '!*':
-            self.target = self._get_next_str()
+        if self.expr_str == '!*':
+            self.expr_res = self._get_next_str()
             return
         if self._check_int_expr():
             return
         if self._check_float_expr():
             return
-        if self.expr.startswith("@"):
+        if self.expr_str.startswith("@"):
             self._handle_raw_op()
         raise SyntaxError("Unknown expression")
 
     def _handle_raw_op(self):
-        self.raw_op_str: str = self.expr[1:]  # remove '@' prefix
+        self.raw_op_str: str = self.expr_str[1:]  # remove '@' prefix
         self.raw_op_parts = [s.strip() for s in self.raw_op_str.split('(', 1)]
         if len(self.raw_op_parts) == 0 or not self.raw_op_parts[0]:
             raise SyntaxError("Raw operation requires name")
         if len(self.raw_op_parts) == 1:
             # no args, just name 
-            self.target = Block(self.raw_op_parts[0])
+            self.expr_res = Block(self.raw_op_parts[0])
         self.raw_op_name, self.raw_op_args = self.raw_op_parts
         self.raw_op_args = '(' + self.raw_op_args  # add on removed '('
         self.pmatcher = ParenMatcher(self.raw_op_args, 'start').match()
@@ -214,14 +214,14 @@ class Parser:
         return s
 
     def _check_int_expr(self):
-        if self._try_convert_to_target(int, self.expr):
+        if self._try_convert_to_target(int, self.expr_str):
             return True
-        if self._try_convert_with_base(self.expr, 2, "0b"):
+        if self._try_convert_with_base(self.expr_str, 2, "0b"):
             return True
-        if self._try_convert_with_base(self.expr, 8, "0o"):
+        if self._try_convert_with_base(self.expr_str, 8, "0o"):
             return True
-        if (self._try_convert_with_base(self.expr, 16, "0x")
-                or self._try_convert_with_base(self.expr, 16, "0h")):
+        if (self._try_convert_with_base(self.expr_str, 16, "0x")
+                or self._try_convert_with_base(self.expr_str, 16, "0h")):
             return True
 
     def _try_convert_with_base(self, s: str, base: int, prefix: str):
@@ -229,13 +229,13 @@ class Parser:
 
     def _try_convert_to_target(self, converter, *args):
         try:
-            self.target = converter(*args)
+            self.expr_res = converter(*args)
             return True
         except ValueError:
-            pass
+            return None
 
     def _check_float_expr(self):
-        return self._try_convert_to_target(float, self.expr)
+        return self._try_convert_to_target(float, self.expr_str)
 
 
 def _unescape(s: str):
