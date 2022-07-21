@@ -12,6 +12,7 @@ LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
+STR_REPL_RE = re.compile(r'!\*\$str:(\d+)')
 
 
 class StrReplacer:
@@ -26,8 +27,9 @@ class StrReplacer:
 
     def replacer(self, m: re.Match):
         contents = m[1]
+        idx = len(self.strings)
         self.strings.append(contents)
-        return '!*'
+        return '!*$str:' + str(idx)
 
 
 class ParenMatcher:
@@ -47,7 +49,7 @@ class ParenMatcher:
         return self
 
     def _match(self):
-        self.out = []
+        self.out: 'list[tuple[str, int, int]]' = []
         self.paren_stack = []
         self.i = 0
         while self.i < len(self.orig) and not self.finished:
@@ -112,7 +114,6 @@ class Parser:
 
     def _parse(self):
         self.smts = []
-        self.str_index = 0
         self.str_repl = StrReplacer(self.src).replace()
         if self.str_repl.new.count('!*') != len(self.str_repl.strings):
             raise SyntaxError("Invalid syntax: !* may not be used outside of strings")
@@ -128,7 +129,7 @@ class Parser:
         self.smts.append(self.smt)
 
     def _handle_assign(self):
-        self.assign_sides = list(map(str.strip, self.line.split('=')))
+        self.assign_sides = [s.strip() for s in self.line.split('=')]
         if len(self.assign_sides) < 2:
             return False
         if len(self.assign_sides) > 2:
@@ -180,7 +181,7 @@ class Parser:
         self._set_assign_target(self.expr_res)
 
     def _gen_assign_target(self):
-        if self.expr_str == '!*':
+        if self.expr_str.startswith('!*'):  # todo use an unprintable character (eg. \x1a)
             self.expr_res = self._get_next_str()
             return
         if self._check_int_expr():
@@ -199,22 +200,29 @@ class Parser:
         if len(self.raw_op_parts) == 1:
             # no args, just name 
             self.expr_res = Block(self.raw_op_parts[0])
-        self.raw_op_name, self.raw_op_args = self.raw_op_parts
-        self.raw_op_args = '(' + self.raw_op_args  # add on removed '('
-        self.pmatcher = ParenMatcher(self.raw_op_args, 'start').match()
+        self.raw_op_name, self.op_args_str = self.raw_op_parts
+        self.op_args_str = '(' + self.op_args_str  # add on removed '('
+        self.pmatcher = ParenMatcher(self.op_args_str, 'start').match()
         assert self.pmatcher.out[0][:2] == ('()', 0)
         end = self.pmatcher.out[0][2]
-        self.raw_op_args = self.raw_op_args[:end + 1]
-        ...
+        self.op_args_str = self.op_args_str[:end + 1]
 
-    def _get_next_str(self, inc=True):
-        s = _unescape(self.str_repl.strings[self.str_index])
-        if inc:
-            self.str_index += 1
+    def _replace_parens(self, text: str, pm: ParenMatcher = None):
+        if pm is None:
+            pm = ParenMatcher(text, 'start').match()
+        assert pm.sort_by == 'start'
+        for _t, start, end in pm.out:
+            ...
+
+    def _get_next_str(self):
+        m = STR_REPL_RE.match(self.expr_str)
+        assert m
+        idx = int(m.group(1))
+        s = _unescape(self.str_repl.strings[idx])
         return s
 
     def _check_int_expr(self):
-        if self._try_convert_to_target(int, self.expr_str):
+        if self._try_convert_into_res(int, self.expr_str):
             return True
         if self._try_convert_with_base(self.expr_str, 2, "0b"):
             return True
@@ -225,9 +233,9 @@ class Parser:
             return True
 
     def _try_convert_with_base(self, s: str, base: int, prefix: str):
-        return s.startswith(prefix) and self._try_convert_to_target(int, s[2:], base)
+        return s.startswith(prefix) and self._try_convert_into_res(int, s[2:], base)
 
-    def _try_convert_to_target(self, converter, *args):
+    def _try_convert_into_res(self, converter, *args):
         try:
             self.expr_res = converter(*args)
             return True
@@ -235,7 +243,7 @@ class Parser:
             return None
 
     def _check_float_expr(self):
-        return self._try_convert_to_target(float, self.expr_str)
+        return self._try_convert_into_res(float, self.expr_str)
 
 
 def _unescape(s: str):
