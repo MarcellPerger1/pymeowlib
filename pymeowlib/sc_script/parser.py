@@ -211,8 +211,17 @@ class Parser:
         if pm is None:
             pm = ParenMatcher(text, 'start').match()
         assert pm.sort_by == 'start'
-        for _t, start, end in pm.out:
-            ...
+        regions = []
+        for t, start, end in pm.out:
+            is_inner = False
+            for r in regions:
+                # if starts in region
+                if r[0] <= start <= r[1]:
+                    is_inner = True
+            if is_inner:
+                continue
+
+
 
     def _get_next_str(self):
         m = STR_REPL_RE.match(self.expr_str)
