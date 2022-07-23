@@ -206,8 +206,16 @@ class Parser:
         self.line = self.line.strip()
         if not self.line:
             return
-        self._handle_assign()
-        self.smts.append(self.smt)
+        self._make_smt()
+        if self.smt is not None:
+            self.smts.append(self.smt)
+
+    def _make_smt(self):
+        if self._handle_assign():
+            return
+        if self.line.startswith('@'):
+            self._handle_raw_op(self.line)
+        raise SyntaxError(f"Invalid statement: {self.line!r}")
 
     def _handle_assign(self):
         self.assign_sides = [s.strip() for s in self.line.split('=')]
@@ -228,7 +236,7 @@ class Parser:
         if self._check_listitem_assign():
             self._init_listitem_assign()
             return
-        raise SyntaxError("Invalid LHS of assignment")
+        raise SyntaxError(f"Invalid LHS of assignment: {self.left!r}")
 
     def _check_var_assign(self):
         m = IDENT_RE.fullmatch(self.left)
