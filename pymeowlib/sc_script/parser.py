@@ -178,12 +178,10 @@ class ParenSubst:
 
 
 def parses(s: str):
-    ...
     return Parser(s).parse()
 
 
 class Parser:
-    expr_str: str
     left: str
     line: str
 
@@ -293,7 +291,7 @@ class Parser:
             self.expr_res = Block(self.op_parts[0])
         self.op_name, self.op_args_str = self.op_parts
         self.op_args_str = '(' + self.op_args_str  # add on removed '('
-        self.expr_res = [self.op_name, *self._handle_op_args(self.op_args_str)]
+        self.expr_res = Block(self.op_name, *self._handle_op_args(self.op_args_str))
 
     def _handle_op_args(self, op_args_str):
         pr = ParenSubst(op_args_str).subst()
@@ -340,14 +338,3 @@ class Parser:
 def _unescape(s: str):
     # or encode with "latin-1", "backslashescape" ?
     return s.encode('raw_unicode_escape').decode('unicode_escape')
-
-
-def main():
-    test_text = "(some, (stuff), (), (other, things, (inner, ()))) after=1"
-    pr = ParenSubst(test_text).subst()
-    print(pr.new)
-    print(pr.par_contents)
-
-
-if __name__ == '__main__':
-    main()
