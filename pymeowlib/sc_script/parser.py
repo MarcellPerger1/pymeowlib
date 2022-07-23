@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import operator as op
 from collections import UserDict
-from typing import Optional
+from typing import Optional, Match
 
 from ..opcode_compile.blocks import Block
 
@@ -22,7 +22,7 @@ class AttrDict(UserDict):
         super().__init__(obj.__dict__)
 
 
-class ContentReplacer:
+class ContentSubstPattern:
     prefix = '!*${name}:'
     suffix = '*!'
 
@@ -43,8 +43,8 @@ class ContentReplacer:
         return self.inst_prefix + str(value) + self.inst_suffix
 
 
-STR_REPL = ContentReplacer("str")
-PAR_REPL = ContentReplacer("par")
+STR_REPL = ContentSubstPattern("str")
+PAR_REPL = ContentSubstPattern("par")
 
 
 class StrReplacer:
@@ -138,24 +138,27 @@ class ParenMatcher:
         raise ValueError(f"Unmatched paren: expected '{expected}', got '{self.c}'")
 
 
-class ParenReplacer:
+class ParenSubst:
     def __init__(self, text: str, pm: ParenMatcher = None):
         self.text = text
+        self.par_contents: 'Optional[list[tuple[str, int, int]]]' = None
         self.pm = pm
         if self.pm is None:
             self.pm = ParenMatcher(self.text)
         self.pm.match(sort='start')
 
-    def replace(self):
-        self._replace()
+    def subst(self):
+        if self.par_contents is None:
+            self._subst()
         return self
 
-    def _replace(self):
+    def _subst(self):
         self.par_contents = []
         self.new = ''
         par_end = 0
         for i, (t, start, end) in enumerate(self.pm.out):
             if i == 0:
+                self.new += self.text[:start + 1]
                 continue
             if start <= par_end:
                 continue
@@ -164,6 +167,14 @@ class ParenReplacer:
             self.par_contents.append((self.text[start:end + 1], start, end))
             par_end = end
         self.end = self.pm.out[0][2]
+        self.new += self.text[par_end + 1:self.end+1]
+
+    def replace_into(self, text: str):
+        self.subst()
+        return PAR_REPL.re.sub(self._replacer, text)
+
+    def _replacer(self, m: Match) -> str:
+        return self.par_contents[int(m[1])][0]
 
 
 def parses(s: str):
@@ -184,6 +195,7 @@ class Parser:
         return self
 
     def _parse(self):
+        self.expr_res = None
         self.smts = []
         self.str_repl = StrReplacer(self.src).replace()
         if self.str_repl.new.count('!*') != len(self.str_repl.strings):
@@ -207,8 +219,8 @@ class Parser:
             raise NotImplementedError("Multiple assignment has not been implemented yet")
         self.left, expr = self.assign_sides
         self._handle_left()
-        self._handle_expr(expr)
-        self._set_assign_target(self.expr_res)
+        res = self._handle_expr(expr)
+        self._set_assign_target(res)
         return True
 
     def _handle_left(self):
@@ -249,9 +261,15 @@ class Parser:
             assert False
 
     def _handle_expr(self, expr: str):
-        self._gen_assign_target(expr)
+        prev = self.expr_res
+        try:
+            self._make_expr_res(expr)
+            return self.expr_res
+        finally:
+            # restore previous result
+            self.expr_res = prev
 
-    def _gen_assign_target(self, expr: str):
+    def _make_expr_res(self, expr: str):
         # todo use an unprintable character (eg. \x1a)
         if expr.startswith('!*'):
             self.expr_res = self._get_next_str(expr)
@@ -262,7 +280,8 @@ class Parser:
             return
         if expr.startswith("@"):
             self._handle_raw_op(expr)
-        raise SyntaxError("Unknown expression")
+            return
+        raise SyntaxError(f"Unknown expression: {expr!r}")
 
     def _handle_raw_op(self, expr: str):
         self.op_str: str = expr[1:]  # remove '@' prefix
@@ -274,12 +293,17 @@ class Parser:
             self.expr_res = Block(self.op_parts[0])
         self.op_name, self.op_args_str = self.op_parts
         self.op_args_str = '(' + self.op_args_str  # add on removed '('
+        self.expr_res = [self.op_name, *self._handle_op_args(self.op_args_str)]
 
     def _handle_op_args(self, op_args_str):
-        pr = ParenReplacer(op_args_str).replace()
-        arg_strs = [s.strip() for s in pr.new.split(',')]
+        pr = ParenSubst(op_args_str).subst()
+        arg_strs = [s.strip() for s in pr.new[1:-1].split(',')]
+        ret = []
         for arg in arg_strs:
-            self._handle_expr(arg)
+            arg = pr.replace_into(arg)
+            expr_res = self._handle_expr(arg)
+            ret.append(expr_res)
+        return ret
 
     def _get_next_str(self, expr: str):
         m = STR_REPL.match(expr)
@@ -320,7 +344,7 @@ def _unescape(s: str):
 
 def main():
     test_text = "(some, (stuff), (), (other, things, (inner, ()))) after=1"
-    pr = ParenReplacer(test_text).replace()
+    pr = ParenSubst(test_text).subst()
     print(pr.new)
     print(pr.par_contents)
 
