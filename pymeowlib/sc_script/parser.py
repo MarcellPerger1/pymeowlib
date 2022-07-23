@@ -315,10 +315,12 @@ def _unescape(s: str):
     return s.encode('raw_unicode_escape').decode('unicode_escape')
 
 
-if __name__ == '__main__':
-    import pprint
-
+def main():
     test_text = "(some, (stuff), (), (other, things, (inner, ()))) after=1"
     pr = ParenReplacer(test_text).replace()
     print(pr.new)
     print(pr.par_contents)
+
+
+if __name__ == '__main__':
+    main()
