@@ -205,6 +205,7 @@ class Parser:
         self.left, self.expr_str = self.assign_sides
         self._handle_left()
         self._handle_expr()
+        self._set_assign_target(self.expr_res)
         return True
 
     def _handle_left(self):
@@ -246,7 +247,6 @@ class Parser:
 
     def _handle_expr(self):
         self._gen_assign_target()
-        self._set_assign_target(self.expr_res)
 
     def _gen_assign_target(self):
         if self.expr_str.startswith('!*'):  # todo use an unprintable character (eg. \x1a)
