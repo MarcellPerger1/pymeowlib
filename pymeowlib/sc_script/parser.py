@@ -205,9 +205,9 @@ class Parser:
             return False
         if len(self.assign_sides) > 2:
             raise NotImplementedError("Multiple assignment has not been implemented yet")
-        self.left, self.expr_str = self.assign_sides
+        self.left, expr = self.assign_sides
         self._handle_left()
-        self._handle_expr()
+        self._handle_expr(expr)
         self._set_assign_target(self.expr_res)
         return True
 
@@ -248,23 +248,24 @@ class Parser:
         else:
             assert False
 
-    def _handle_expr(self):
-        self._gen_assign_target()
+    def _handle_expr(self, expr: str):
+        self._gen_assign_target(expr)
 
-    def _gen_assign_target(self):
-        if self.expr_str.startswith('!*'):  # todo use an unprintable character (eg. \x1a)
-            self.expr_res = self._get_next_str()
+    def _gen_assign_target(self, expr: str):
+        # todo use an unprintable character (eg. \x1a)
+        if expr.startswith('!*'):
+            self.expr_res = self._get_next_str(expr)
             return
-        if self._check_int_expr():
+        if self._check_int_expr(expr):
             return
-        if self._check_float_expr():
+        if self._check_float_expr(expr):
             return
-        if self.expr_str.startswith("@"):
-            self._handle_raw_op()
+        if expr.startswith("@"):
+            self._handle_raw_op(expr)
         raise SyntaxError("Unknown expression")
 
-    def _handle_raw_op(self):
-        self.op_str: str = self.expr_str[1:]  # remove '@' prefix
+    def _handle_raw_op(self, expr: str):
+        self.op_str: str = expr[1:]  # remove '@' prefix
         self.op_parts = [s.strip() for s in self.op_str.split('(', 1)]
         if len(self.op_parts) == 0 or not self.op_parts[0]:
             raise SyntaxError("Raw operation requires name")
@@ -274,26 +275,28 @@ class Parser:
         self.op_name, self.op_args_str = self.op_parts
         self.op_args_str = '(' + self.op_args_str  # add on removed '('
 
-    def _handle_op_args(self):
-        self.pr = ParenReplacer(self.op_args_str).replace()
-        self.arg_strs = [s.strip() for s in self.pr.new.split(',')]
+    def _handle_op_args(self, op_args_str):
+        pr = ParenReplacer(op_args_str).replace()
+        arg_strs = [s.strip() for s in pr.new.split(',')]
+        for arg in arg_strs:
+            self._handle_expr(arg)
 
-    def _get_next_str(self):
-        m = STR_REPL.match(self.expr_str)
+    def _get_next_str(self, expr: str):
+        m = STR_REPL.match(expr)
         assert m
         idx = int(m.group(1))
         s = _unescape(self.str_repl.strings[idx])
         return s
 
-    def _check_int_expr(self):
-        if self._try_convert_into_res(int, self.expr_str):
+    def _check_int_expr(self, expr):
+        if self._try_convert_into_res(int, expr):
             return True
-        if self._try_convert_with_base(self.expr_str, 2, "0b"):
+        if self._try_convert_with_base(expr, 2, "0b"):
             return True
-        if self._try_convert_with_base(self.expr_str, 8, "0o"):
+        if self._try_convert_with_base(expr, 8, "0o"):
             return True
-        if (self._try_convert_with_base(self.expr_str, 16, "0x")
-                or self._try_convert_with_base(self.expr_str, 16, "0h")):
+        if (self._try_convert_with_base(expr, 16, "0x")
+                or self._try_convert_with_base(expr, 16, "0h")):
             return True
 
     def _try_convert_with_base(self, s: str, base: int, prefix: str):
@@ -306,8 +309,8 @@ class Parser:
         except ValueError:
             return None
 
-    def _check_float_expr(self):
-        return self._try_convert_into_res(float, self.expr_str)
+    def _check_float_expr(self, expr: str):
+        return self._try_convert_into_res(float, expr)
 
 
 def _unescape(s: str):
