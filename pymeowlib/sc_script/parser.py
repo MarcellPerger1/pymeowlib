@@ -13,6 +13,7 @@ LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
+# just for reference, this isn't used anywhere
 STR_REPL_RE = re.compile(r'!\*\$str:(\d+)\*!')
 
 
@@ -35,7 +36,7 @@ class ContentReplacer:
                     + re.escape(self.inst_suffix))
         self.re = re.compile(self.pat)
 
-    def matches(self, s: str, full=False):
+    def match(self, s: str, full=False):
         return self.re.fullmatch(s) if full else self.re.match(s)
 
     def make(self, value):
@@ -43,6 +44,7 @@ class ContentReplacer:
 
 
 STR_REPL = ContentReplacer("str")
+PAR_REPL = ContentReplacer("par")
 
 
 class StrReplacer:
@@ -76,8 +78,16 @@ class ParenMatcher:
         self.finished = False
         self.consumed_all = None
 
-    def match(self):
-        self._match()
+    def sort(self, by: str = None, reverse=False):
+        self.sort_by = by
+        self.reverse = reverse
+        self._sort_output()
+        return self
+
+    def match(self, sort=None, reverse=False):
+        if not self.finished:
+            self._match()
+        self.sort(sort, reverse)
         return self
 
     def _match(self):
@@ -93,7 +103,8 @@ class ParenMatcher:
         self._sort_output()
 
     def _sort_output(self):
-        if self.sort_by is None:
+        # don't sort if unfinished
+        if not self.finished or self.sort_by is None:
             return
         if self.sort_by == 'type':
             self.sort_idx = 0
@@ -125,6 +136,31 @@ class ParenMatcher:
             self.out.append((tos_c + self.c, tos_i, self.i))
             return
         raise ValueError(f"Unmatched paren: expected '{expected}', got '{self.c}'")
+
+
+class ParenReplacer:
+    def __init__(self, text: str, pm: ParenMatcher = None):
+        self.text = text
+        self.pm = pm
+        if self.pm is None:
+            self.pm = ParenMatcher(self.text)
+        self.pm.match(sort='start')
+
+    def replace(self):
+        par_contents = []
+        idx = 0
+        new = ''
+        par_end = 0
+        for i, (t, start, end) in enumerate(self.pm.out):
+            if i == 0:
+                continue
+            if start <= par_end:
+                continue
+            new += self.text[par_end + 1:start] + PAR_REPL.make(idx)
+            idx += 1
+            par_end = end
+            par_contents.append((self.text[start:end + 1], start, end))
+        return new, par_contents
 
 
 def parses(s: str):
@@ -239,26 +275,8 @@ class Parser:
         end = self.pmatcher.out[0][2]
         self.op_args_str = self.op_args_str[:end + 1]
 
-    def _replace_parens(self, text: str, pm: ParenMatcher = None):
-        if pm is None:
-            pm = ParenMatcher(text, 'start').match()
-        assert pm.sort_by == 'start'
-        par_contents = []
-        idx = 0
-        new = ''
-        par_end = 0
-        for i, (t, start, end) in enumerate(pm.out):
-            if i == 0:
-                continue
-            if start <= par_end:
-                continue
-            new += text[par_end + 1:start] + '!*$par:' + str(idx)
-            idx += 1
-            par_end = end
-            par_contents.append((text[start:end + 1], start, end))
-
     def _get_next_str(self):
-        m = STR_REPL_RE.match(self.expr_str)
+        m = STR_REPL.match(self.expr_str)
         assert m
         idx = int(m.group(1))
         s = _unescape(self.str_repl.strings[idx])
@@ -292,3 +310,10 @@ class Parser:
 def _unescape(s: str):
     # or encode with "latin-1", "backslashescape" ?
     return s.encode('raw_unicode_escape').decode('unicode_escape')
+
+
+if __name__ == '__main__':
+    import pprint
+
+    test_text = "(some, (stuff), (), (other, things, (inner, ())))"
+    pprint.pp(ParenReplacer(test_text).replace(), indent=2)
