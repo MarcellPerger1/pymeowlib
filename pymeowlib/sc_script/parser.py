@@ -264,15 +264,19 @@ class Parser:
         raise SyntaxError("Unknown expression")
 
     def _handle_raw_op(self):
-        self.raw_op_str: str = self.expr_str[1:]  # remove '@' prefix
-        self.raw_op_parts = [s.strip() for s in self.raw_op_str.split('(', 1)]
-        if len(self.raw_op_parts) == 0 or not self.raw_op_parts[0]:
+        self.op_str: str = self.expr_str[1:]  # remove '@' prefix
+        self.op_parts = [s.strip() for s in self.op_str.split('(', 1)]
+        if len(self.op_parts) == 0 or not self.op_parts[0]:
             raise SyntaxError("Raw operation requires name")
-        if len(self.raw_op_parts) == 1:
+        if len(self.op_parts) == 1:
             # no args, just name 
-            self.expr_res = Block(self.raw_op_parts[0])
-        self.raw_op_name, self.op_args_str = self.raw_op_parts
+            self.expr_res = Block(self.op_parts[0])
+        self.op_name, self.op_args_str = self.op_parts
         self.op_args_str = '(' + self.op_args_str  # add on removed '('
+
+    def _handle_op_args(self):
+        self.pr = ParenReplacer(self.op_args_str).replace()
+        self.arg_strs = [s.strip() for s in self.pr.new.split(',')]
 
     def _get_next_str(self):
         m = STR_REPL.match(self.expr_str)
@@ -314,5 +318,7 @@ def _unescape(s: str):
 if __name__ == '__main__':
     import pprint
 
-    test_text = "(some, (stuff), (), (other, things, (inner, ())))"
-    pprint.pp(ParenReplacer(test_text).replace(), indent=2)
+    test_text = "(some, (stuff), (), (other, things, (inner, ()))) after=1"
+    pr = ParenReplacer(test_text).replace()
+    print(pr.new)
+    print(pr.par_contents)
