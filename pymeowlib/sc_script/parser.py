@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import operator as op
+from collections import UserDict
 from typing import Optional
 
 from ..opcode_compile.blocks import Block
@@ -12,10 +13,41 @@ LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
-STR_REPL_RE = re.compile(r'!\*\$str:(\d+)')
+STR_REPL_RE = re.compile(r'!\*\$str:(\d+)\*!')
+
+
+class AttrDict(UserDict):
+    def __init__(self, obj: object):
+        super().__init__(obj.__dict__)
+
+
+class ContentReplacer:
+    prefix = '!*${name}:'
+    suffix = '*!'
+
+    def __init__(self, name, value_pat: str = r'(\d+)'):
+        self.name = name
+        self.value_pat = value_pat
+        self.inst_prefix = self.prefix.format(name=self.name)
+        self.inst_suffix = self.suffix.format()
+        self.pat = (re.escape(self.inst_prefix)
+                    + self.value_pat
+                    + re.escape(self.inst_suffix))
+        self.re = re.compile(self.pat)
+
+    def matches(self, s: str, full=False):
+        return self.re.fullmatch(s) if full else self.re.match(s)
+
+    def make(self, value):
+        return self.inst_prefix + str(value) + self.inst_suffix
+
+
+STR_REPL = ContentReplacer("str")
 
 
 class StrReplacer:
+    repl = STR_REPL
+
     def __init__(self, s: str):
         self.orig = s
         self.new: Optional[str] = None
@@ -29,7 +61,7 @@ class StrReplacer:
         contents = m[1]
         idx = len(self.strings)
         self.strings.append(contents)
-        return '!*$str:' + str(idx)
+        return self.repl.make(idx)
 
 
 class ParenMatcher:
@@ -220,11 +252,10 @@ class Parser:
                 continue
             if start <= par_end:
                 continue
-            new += text[par_end+1:start] + '!*$par:' + str(idx)
+            new += text[par_end + 1:start] + '!*$par:' + str(idx)
             idx += 1
             par_end = end
-            par_contents.append((text[start:end+1], start, end))
-        print('z')
+            par_contents.append((text[start:end + 1], start, end))
 
     def _get_next_str(self):
         m = STR_REPL_RE.match(self.expr_str)
