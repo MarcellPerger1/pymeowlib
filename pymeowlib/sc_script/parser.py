@@ -147,20 +147,23 @@ class ParenReplacer:
         self.pm.match(sort='start')
 
     def replace(self):
-        par_contents = []
-        idx = 0
-        new = ''
+        self._replace()
+        return self
+
+    def _replace(self):
+        self.par_contents = []
+        self.new = ''
         par_end = 0
         for i, (t, start, end) in enumerate(self.pm.out):
             if i == 0:
                 continue
             if start <= par_end:
                 continue
-            new += self.text[par_end + 1:start] + PAR_REPL.make(idx)
-            idx += 1
+            self.new += (self.text[par_end + 1:start]
+                         + PAR_REPL.make(len(self.par_contents)))
+            self.par_contents.append((self.text[start:end + 1], start, end))
             par_end = end
-            par_contents.append((self.text[start:end + 1], start, end))
-        return new, par_contents
+        self.end = self.pm.out[0][2]
 
 
 def parses(s: str):
@@ -270,10 +273,6 @@ class Parser:
             self.expr_res = Block(self.raw_op_parts[0])
         self.raw_op_name, self.op_args_str = self.raw_op_parts
         self.op_args_str = '(' + self.op_args_str  # add on removed '('
-        self.pmatcher = ParenMatcher(self.op_args_str, 'start').match()
-        assert self.pmatcher.out[0][:2] == ('()', 0)
-        end = self.pmatcher.out[0][2]
-        self.op_args_str = self.op_args_str[:end + 1]
 
     def _get_next_str(self):
         m = STR_REPL.match(self.expr_str)
