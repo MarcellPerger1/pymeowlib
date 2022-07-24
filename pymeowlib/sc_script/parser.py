@@ -215,6 +215,8 @@ class Parser:
             return
         if self.line.startswith('@'):
             self._handle_raw_op(self.line)
+            self.smt = self.expr_res
+            return
         raise SyntaxError(f"Invalid statement: {self.line!r}")
 
     def _handle_assign(self):

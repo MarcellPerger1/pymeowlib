@@ -35,8 +35,9 @@ PARSER_TESTS = [
          ]
     ),
     (
-        'some  = @+(0o27, @-(0x3b, 0b11))',
-        [["setVar:to:", "some", ["+", 0o27, ["-", 0x3b, 0b11]]]]
+        'some  = @+(0o27, @-(0x3b, 0b11))\n   @deleteLine:ofList:(@/(18, 0h2), "ls")',
+        [["setVar:to:", "some", ["+", 0o27, ["-", 0x3b, 0b11]]],
+         ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
     )
 ]
 
