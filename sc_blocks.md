@@ -1,3 +1,6 @@
+# Block ids
+
+## Math
 | Selector | Block |
 | -------- | ----- |
 | `+` | () + () |
@@ -5,14 +8,56 @@
 | `*` | () * () |
 | `/` | () / () |
 | `%` | () % () |
-| <code>&#124;</code> | () or () |
+| `rounded` | Round () |
+| `computeFunction:of:` | () of () ([Other math functions](https://en.scratch-wiki.info/wiki/()_of_()_(Operators_block))) |
+
+## Logic
+| Selector | Block |
+| -------- | ----- |
 | `&` | () and () |
+| <code>&#124;</code> | () or () |
+| `not` | not () |
 | `<` | () < () |
 | `=` | () == () |
 | `>` | () > () |
-| `abs` | Abs () |
-| `answer` | Answer |
+
+## Variables / Lists
+### Variables
+| Selector | Block |
+| -------- | ----- |
+| `readVariable` | () (Variable block) |
+| `setVar:to:` | Set () to () |
+| `showVariable:` | Show Variable () |
+| `hideVariable:` | Hide Variable () |
+
+### Lists
+| Selector | Block |
+| -------- | ----- |
+| `contentsOfList:` | () (List block) |
+| `getLine:ofList:` | Item () of () |
+| `lineCountOfList:` | Length of () (List block) |
+| `list:contains:` | () Contains () |
+| `setLine:ofList:to:` | Replace Item () of () with () |
 | `append:toList:` | Add () to () |
+| `insert:at:ofList:` | Insert () at () of () |
+| `deleteLine:ofList:` | Delete () of () |
+| `showList:` | Show List () |
+| `hideList:` | Hide List () |
+
+## Flow control / C Blocks (or whatever it's called)
+| Selector | Block |
+| -------- | ----- |
+| `doIf` | If () Then |
+| `doIfElse` | If () Then, Else |
+| `doRepeat` | Repeat () |
+| `doUntil` | Repeat Until () |
+| `doForever` | Forever |
+
+
+## Other
+| Selector | Block |
+| -------- | ----- |
+| `answer` | Answer |
 | `backgroundIndex` | Backdrop # |
 | `bounceOffEdge` | If on Edge, Bounce |
 | `broadcast:` | Broadcast () |
@@ -30,35 +75,23 @@
 | `CLR_COUNT` | Clear Counter |
 | `color:sees:` | Color () is Touching ()? |
 | `comeToFront` | Go to Front |
-| `computeFunction:of:` | () of () (Operators block) |
 | `concatenate:with:` | Join ()() |
-| `contentsOfList:` | () (List block) |
 | `costumeIndex` | Costume # |
 | `costumeName` | Costume Name |
 | `COUNT` | Counter |
 | `createCloneOf` | Create Clone of () |
 | `deleteClone` | Delete This Clone |
-| `deleteLine:ofList:` | Delete () of () |
 | `distanceTo:` | Distance to () |
 | `doAsk` | Ask () and Wait |
 | `doBroadcastAndWait` | Broadcast () and Wait |
-| `doForever` | Forever |
-| `doForeverIf` | Forever If () |
-| `doForLoop` | For Each () in () |
-| `doIf` | If () Then |
-| `doIfElse` | If () Then, Else |
 | `doPlaySoundAndWait` | Play Sound () Until Done |
-| `doRepeat` | Repeat () |
 | `doReturn` | Stop Script |
-| `doUntil` | Repeat Until () |
 | `doWaitUntil` | Wait Until () |
-| `doWhile` | While () |
 | `drum:duration:elapsed:from:` | Play Drum () for () Beats |
 | `filterReset` | Clear Graphic Effects |
 | `forward:` | Move () Steps |
 | `fxTest` | Color FX Test () |
 | `getAttribute:of:` | () of () (Sensing block) |
-| `getLine:ofList:` | Item () of () |
 | `getParam` | custom block parameter |
 | `getUserId` | User ID |
 | `getUserName` | Username |
@@ -70,16 +103,11 @@
 | `heading:` | Point in Direction () |
 | `hide` | Hide |
 | `hideAll` | Hide All Sprites |
-| `hideList:` | Hide List () |
-| `hideVariable:` | Hide Variable () |
 | `INCR_COUNT` | Increment Counter |
-| `insert:at:ofList:` | Insert () at () of () |
 | `instrument:` | Set Instrument to () |
 | `isLoud` | Loud? |
 | `keyPressed:` | Key () Pressed? |
 | `letter:of:` | Letter () of () |
-| `lineCountOfList:` | Length of () (List block) |
-| `list:contains:` | () Contains () |
 | `lookLike:` | Switch Costume to () |
 | `midiInstrument:` | Set Instrument to () |
 | `mousePressed` | Mouse Down? |
@@ -87,7 +115,6 @@
 | `mouseY` | Mouse Y |
 | `nextCostume` | Next Costume |
 | `nextScene` | Next Backdrop |
-| `not` | Not () |
 | `noteOn:duration:elapsed:from:` | Play Note () for () Beats |
 | `obsolete` | Obsolete |
 | `penColor:` | Set Pen Color to () |
@@ -98,9 +125,7 @@
 | `putPenDown` | Pen Down |
 | `putPenUp` | Pen Up |
 | `randomFrom:to:` | Pick Random () to () |
-| `readVariable` | () (Variables block) |
 | `rest:elapsed:from:` | Rest for () Beats |
-| `rounded` | Round () |
 | `say:` | Say () |
 | `say:duration:elapsed:from:` | Say () for () Seconds |
 | `sayNothing` | Say Nothing |
@@ -113,21 +138,16 @@
 | `sensor:` | () Sensor Value |
 | `sensorPressed:` | Sensor ()? |
 | `setGraphicEffect:to:` | Set () Effect to () |
-| `setLine:ofList:to:` | Replace Item () of () with () |
 | `setPenHueTo:` | Set Pen Color to () |
 | `setPenShadeTo:` | Set Pen Shade to () |
 | `setRotationStyle` | Set Rotation Style () |
 | `setSizeTo:` | Set Size to ()% |
 | `setTempoTo:` | Set Tempo to () bpm |
-| `setVar:to:` | Set () to () |
 | `setVideoState` | Turn Video () |
 | `setVideoTransparency` | Set Video Transparency to ()% |
 | `setVolumeTo:` | Set Volume to ()% |
 | `show` | Show |
-| `showList:` | Show List () |
-| `showVariable:` | Show Variable () |
 | `soundLevel` | Loudness |
-| `sqrt` | Sqrt () |
 | `stampCostume` | Stamp |
 | `startScene` | Switch Backdrop to () |
 | `startSceneAndWait` | Switch Backdrop to () and Wait |
@@ -165,3 +185,20 @@
 | `ypos` | Y Position |
 | `ypos:` | Set Y to () |
 | `yScroll` | Y Scroll |
+
+
+## Experimental / Hidden
+| Selector | Block |
+| -------- | ----- |
+| `doForLoop` | For Each () in () |
+| `doWhile` | While () |
+
+
+
+## Obsolete / removed
+| Selector | Block |
+| -------- | ----- |
+| `doForeverIf` | Forever If () |
+| `abs` | Abs () (Use `computeFunction:of:`) |
+| `sqrt` | Sqrt () (Use `computeFunction:of:`) |
+
