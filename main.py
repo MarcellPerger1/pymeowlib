@@ -1,4 +1,3 @@
-# noinspection PyUnresolvedReferences
 import sys
 
 import pymeowlib

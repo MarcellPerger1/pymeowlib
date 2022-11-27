@@ -100,6 +100,10 @@ class ParenMatcher:
             # reached end of input
             self.consumed_all = True
             self.finished = True
+        if len(self.paren_stack) > 0:
+            opening_p = self.paren_stack[-1][0]
+            raise ValueError(f"Unclosed paren: expected {self.open_parens[opening_p]!r}"
+                             f" to close {opening_p!r}")
         self._sort_output()
 
     def _sort_output(self):
@@ -126,9 +130,8 @@ class ParenMatcher:
             self.paren_stack.append((self.c, self.i))
             return
         if len(self.paren_stack) == 0:
-            self.finished = True
-            self.consumed_all = False
-            return
+            # no opening paren to pop
+            raise ValueError(f"No opening paren to close, unmatched {self.c!r}")
         tos = self.paren_stack.pop()
         tos_c, tos_i = tos
         expected = self.open_parens[tos_c]
