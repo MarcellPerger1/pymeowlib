@@ -8,6 +8,10 @@ def parse(s):
     return [smt.get_data() for smt in pymeowlib.sc_script.parser.parses(s).smts]
 
 
+class TestFailed(AssertionError):
+    ...
+
+
 class _Expect:
     expected: object
 
@@ -19,7 +23,7 @@ class _Expect:
         if self.expected != self.actual:
             print("expected:", self.expected, file=sys.stderr)
             print("result:  ", self.actual, file=sys.stderr)
-            raise AssertionError("Test failed")
+            raise TestFailed("Test failed")
 
 
 expect = _Expect
@@ -37,13 +41,25 @@ PARSER_TESTS = [
         'some  = @+(0o27, @-(0x3b, 0b11))\n   @deleteLine:ofList:(@/(18, 0h2), "ls")',
         [["setVar:to:", "some", ["+", 0o27, ["-", 0x3b, 0b11]]],
          ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
+    ),
+    (
+        '  value = 23 + 8\n $ls.7= 12+6-3-1+2\n\n@deleteLine:ofList:(3+@/(1-(9+7), 2))',
+        [["setVar:to:", "value", ["+", 23, 8]],
+         ["setLine:ofList:to:", 7, "$ls", ['+', ['-', ['-', ['+', 12, 6], 3], 1], 2]],
+         ['deleteLine:ofList:', ['+', 3, ['/', ['-', 1, ['+', 9, 7]], 2]]]]
     )
 ]
 
 
 def test():
-    for s, out in PARSER_TESTS:
-        expect(parse(s)).to_be(out)
+    for i, (s, out) in enumerate(PARSER_TESTS):
+        try:
+            expect(parse(s)).to_be(out)
+        except TestFailed:
+            raise
+        except Exception:
+            print(f"Error occurred in test {i}:", file=sys.stderr)
+            raise
 
 
 test()
