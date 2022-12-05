@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 import operator as op
 from collections import UserDict
-from typing import Optional, Match
+from dataclasses import dataclass
+from typing import Optional, Match, Iterable, Union
 
 from ..opcode_compile.blocks import Block
 
@@ -15,6 +16,73 @@ LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'([0-9]*|last|random|all)')
 # just for reference, this isn't used anywhere
 STR_REPL_RE = re.compile(r'!\*\$str:(\d+)\*!')
+
+ScValueT = Union[int, float, bool, str, Block]
+
+
+def split_at_any(s: str, sep: Iterable[str] | str):
+    seps: set[str] = set(sep)
+    if len(seps) == 0:
+        return s.split()
+    if len(seps) == 1:
+        # `seps` will be gc-ed anyway so can mutate it
+        return s.split(seps.pop())
+    curr = ''
+    result = []
+    for c in s:
+        if c in seps:
+            # end of chunk
+            result.append(curr)
+            curr = ''
+        else:
+            curr += c
+    result.append(curr)
+    return result
+
+
+@dataclass
+class SepChunk:
+    s: str = ''
+    start_sep: str | None = None
+    end_sep: str | None = None
+    start_i: int = None  # inclusive
+    end_i: int = None  # exclusive
+
+
+class MultiSplitter:
+    def __init__(self, s: str, sep: str | Iterable[str]):
+        self.s = s
+        self.seps: set[str] = set(sep)
+        self.result: list[SepChunk] | None = None
+        if not all(map(lambda sp: len(sp) == 1, self.seps)):
+            raise ValueError("Each separator must be 1 char")
+
+    def _split(self) -> list[SepChunk] | None:
+        if len(self.seps) == 0:
+            return [SepChunk(s, '', '', i, i+1) for i, s in self.s]
+        curr = SepChunk(start_i=0, start_sep=None)
+        self.result = []
+        for i, c in enumerate(self.s):
+            if c in self.seps:
+                # end of chunk
+                curr.end_i = i
+                curr.end_sep = c
+                self.result.append(curr)
+                curr = SepChunk(start_i=i, start_sep=c)
+            else:
+                curr.s += c
+        curr.end_sep = None
+        curr.end_i = len(self.s)
+        self.result.append(curr)
+
+    def split(self):
+        if self.result is not None:
+            return self
+        result = self._split()
+        if self.result is None:
+            # if not assigned in func, set it to return value
+            self.result = result
+        return self
 
 
 class AttrDict(UserDict):
