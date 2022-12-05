@@ -366,9 +366,16 @@ class Parser:
         if expr.startswith("@"):
             self._handle_raw_op(expr)
             return
+        if self._handle_single_paren_expr(expr):
+            return
         if self._handle_operator_expr(expr):
             return
         raise SyntaxError(f"Unknown expression: {expr!r}")
+
+    def _handle_single_paren_expr(self, expr):
+        if expr[0] == '(' and expr[-1] == ')':
+            self.expr_res = self._handle_expr(expr[1:-1])
+            return True
 
     def _handle_operator_expr(self, expr):
         ps = ParenSubst(expr, subst_outer=True).subst()
