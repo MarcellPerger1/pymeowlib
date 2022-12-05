@@ -269,7 +269,7 @@ class Parser:
         return self
 
     def _parse(self):
-        self.expr_res = None
+        self.expr_res: None | ScValueT = None
         self.smts = []
         self.str_repl = StrReplacer(self.src).replace()
         if self.str_repl.new.count('!*') != len(self.str_repl.strings):
@@ -365,7 +365,26 @@ class Parser:
         if expr.startswith("@"):
             self._handle_raw_op(expr)
             return
+        if self._handle_operator_expr(expr):
+            return
         raise SyntaxError(f"Unknown expression: {expr!r}")
+
+    def _handle_operator_expr(self, expr):
+        ps = ParenSubst(expr).subst()
+        ps_result = ps.new
+        if '+' in ps_result or '-' in ps_result:
+            # handle +/- order of ops
+            ms = MultiSplitter(ps_result, '+-').split()
+            curr_token = None
+            for inner in ms.result:
+                inner_result = self._handle_expr(inner.s)
+                if curr_token is None:
+                    curr_token = inner_result
+                else:
+                    curr_token = Block(inner.start_sep, curr_token, inner_result)
+            self.expr_res = curr_token
+            return True  # found match
+        return False
 
     def _handle_raw_op(self, expr: str):
         self.op_str: str = expr[1:]  # remove '@' prefix
