@@ -210,9 +210,10 @@ class ParenMatcher:
 
 
 class ParenSubst:
-    def __init__(self, text: str, pm: ParenMatcher = None):
+    def __init__(self, text: str, pm: ParenMatcher = None, subst_outer=False):
         self.text = text
         self.par_contents: 'Optional[list[tuple[str, int, int]]]' = None
+        self.subst_outer = subst_outer
         self.pm = pm
         if self.pm is None:
             self.pm = ParenMatcher(self.text)
@@ -231,9 +232,9 @@ class ParenSubst:
             self.new = self.text
             return
         self.new = ''
-        par_end = 0
+        par_end = 0 if not self.subst_outer else -1
         for i, (t, start, end) in enumerate(self.pm.out):
-            if i == 0:
+            if i == 0 and not self.subst_outer:
                 self.new += self.text[:start + 1]
                 continue
             if start <= par_end:
@@ -347,7 +348,7 @@ class Parser:
     def _handle_expr(self, expr: str):
         prev = self.expr_res
         try:
-            self._make_expr_res(expr)
+            self._make_expr_res(expr.strip())
             return self.expr_res
         finally:
             # restore previous result
@@ -370,14 +371,15 @@ class Parser:
         raise SyntaxError(f"Unknown expression: {expr!r}")
 
     def _handle_operator_expr(self, expr):
-        ps = ParenSubst(expr).subst()
+        ps = ParenSubst(expr, subst_outer=True).subst()
         ps_result = ps.new
         if '+' in ps_result or '-' in ps_result:
             # handle +/- order of ops
             ms = MultiSplitter(ps_result, '+-').split()
             curr_token = None
             for inner in ms.result:
-                inner_result = self._handle_expr(inner.s)
+                inner_s = ps.replace_into(inner.s)
+                inner_result = self._handle_expr(inner_s)
                 if curr_token is None:
                     curr_token = inner_result
                 else:
