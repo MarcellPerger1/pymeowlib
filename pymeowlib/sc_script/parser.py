@@ -157,6 +157,11 @@ class ParenSubst:
 
     def _subst(self):
         self.par_contents = []
+        if not self.pm.out:
+            # no parens
+            self.end = len(self.text) - 1
+            self.new = self.text
+            return
         self.new = ''
         par_end = 0
         for i, (t, start, end) in enumerate(self.pm.out):
