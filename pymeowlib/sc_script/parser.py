@@ -4,7 +4,7 @@ import re
 import operator as op
 from collections import UserDict
 from dataclasses import dataclass
-from typing import Optional, Match, Iterable, Union
+from typing import Optional, Match, Iterable, Union, Mapping
 
 from ..opcode_compile.blocks import Block
 
@@ -378,22 +378,31 @@ class Parser:
             return True
 
     def _handle_operator_expr(self, expr):
+        if self._handle_operator_level(expr, '+-'):
+            return True
+        return False
+
+    def _handle_operator_level(self, expr, ops: Mapping[str, str] | Iterable[str]):
+        if isinstance(ops, Mapping):
+            op_to_name: dict[str, str] = dict(ops)
+        else:
+            op_to_name: dict[str, str] = {i: i for i in ops}
+        ops_set = set(op_to_name)
         ps = ParenSubst(expr, subst_outer=True).subst()
         ps_result = ps.new
-        if '+' in ps_result or '-' in ps_result:
-            # handle +/- order of ops
-            ms = MultiSplitter(ps_result, '+-').split()
-            curr_token = None
-            for inner in ms.result:
-                inner_s = ps.replace_into(inner.s)
-                inner_result = self._handle_expr(inner_s)
-                if curr_token is None:
-                    curr_token = inner_result
-                else:
-                    curr_token = Block(inner.start_sep, curr_token, inner_result)
-            self.expr_res = curr_token
-            return True  # found match
-        return False
+        if ops_set.isdisjoint(ps_result):
+            return False  # no operators of this level in `expr`
+        ms = MultiSplitter(ps_result, ops_set).split()
+        curr_token = None
+        for inner in ms.result:
+            inner_s = ps.replace_into(inner.s)
+            inner_result = self._handle_expr(inner_s)
+            if curr_token is None:
+                curr_token = inner_result
+            else:
+                curr_token = Block(op_to_name[inner.start_sep], curr_token, inner_result)
+        self.expr_res = curr_token
+        return True  # found match
 
     def _handle_raw_op(self, expr: str):
         self.op_str: str = expr[1:]  # remove '@' prefix
