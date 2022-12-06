@@ -14,8 +14,8 @@ LIST_IDENT_RE = re.compile(r'[a-zA-Z_$][\w$]*')
 LISTITEM_RE = re.compile(r'([a-zA-Z_$][\w$]*)'
                          r'\.'
                          r'([0-9]*|last|random|all)')
-# just for reference, this isn't used anywhere
-STR_REPL_RE = re.compile(r'!\*\$str:(\d+)\*!')
+# just for reference, this isn't used anywhere and is no longer accurate
+# STR_REPL_RE = re.compile(r'!\*\$str:(\d+)\*!')
 
 ScValueT = Union[int, float, bool, str, Block]
 
@@ -91,8 +91,8 @@ class AttrDict(UserDict):
 
 
 class ContentSubstPattern:
-    prefix = '!*${name}:'
-    suffix = '*!'
+    prefix = '\x01${name}'
+    suffix = '\x02'
 
     def __init__(self, name, value_pat: str = r'(\d+)'):
         self.name = name
@@ -273,8 +273,9 @@ class Parser:
         self.expr_res: None | ScValueT = None
         self.smts = []
         self.str_repl = StrReplacer(self.src).replace()
-        if self.str_repl.new.count('!*') != len(self.str_repl.strings):
-            raise SyntaxError("Invalid syntax: !* may not be used outside of strings")
+        if self.str_repl.new.count('\x01') != len(self.str_repl.strings):
+            raise SyntaxError("Invalid syntax: ascii character 01 (SOH) "
+                              "may not be used outside of strings")
         for self.line in self.str_repl.new.splitlines():
             self._handle_line()
 
@@ -355,8 +356,7 @@ class Parser:
             self.expr_res = prev
 
     def _make_expr_res(self, expr: str):
-        # todo use an unprintable character (eg. \x1a)
-        if expr.startswith('!*'):
+        if expr.startswith('\x01'):
             self.expr_res = self._get_next_str(expr)
             return
         if self._check_int_expr(expr):
