@@ -380,6 +380,8 @@ class Parser:
     def _handle_operator_expr(self, expr):
         if self._handle_operator_level(expr, '+-'):
             return True
+        if self._handle_operator_level(expr, '*/'):
+            return True
         return False
 
     def _handle_operator_level(self, expr, ops: Mapping[str, str] | Iterable[str]):
