@@ -243,7 +243,10 @@ class ParenSubst:
                          + PAR_REPL.make(len(self.par_contents)))
             self.par_contents.append((self.text[start:end + 1], start, end))
             par_end = end
-        self.end = self.pm.out[0][2]
+        if self.subst_outer:
+            self.end = len(self.text) - 1
+        else:
+            self.end = self.pm.out[0][2]
         self.new += self.text[par_end + 1:self.end+1]
 
     def replace_into(self, text: str):
