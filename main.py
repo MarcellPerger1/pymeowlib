@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import sys
+from typing import Any
 
 import pymeowlib
 import pymeowlib.sc_script.parser
@@ -22,13 +25,101 @@ class _Expect:
         self.expected = expected
         if self.expected != self.actual:
             print("expected:", self.expected, file=sys.stderr)
-            print("result:  ", self.actual, file=sys.stderr)
+            print("result:  ", self.actual, file=sys.stderr, end="\n\n")
             raise TestFailed("Test failed")
 
 
 expect = _Expect
 
+
+class _ParserTestCase:
+    expected: Any
+    want_error: Any
+
+    def __init__(self, name: str = None, inp: str = None, result=None, want_error=None):
+        self.inp = inp
+        self.name = name
+        if result is None:
+            return
+        if want_error is None:
+            want_error = isinstance(result, Exception) or issubclass(result, Exception)
+        if want_error:
+            self.error(result)
+        else:
+            self.result(result)
+
+    def input(self, inp: str):
+        self.inp = inp
+        return self
+
+    def result(self, result):
+        self.expected = result
+        self.want_error = False
+        return self
+
+    def error(self, e: Exception | type[Exception]):
+        self.expected = e
+        self.want_error = True
+        return self
+
+    def with_name(self, name: str):
+        self.name = name
+
+    def run_normal(self, i: int):
+        inp = self.inp
+        name = repr(self.name) if self.name is None else f'test {i}'
+        try:
+            expect(parse(inp)).to_be(self.expected)
+        except TestFailed:
+            raise
+        except Exception:
+            print(f"Error occurred in {name} (and wasn't expecting error):",
+                  file=sys.stderr, end="\n\n")
+            raise
+
+    def run_errors(self, i: int):
+        inp = self.inp
+        name = repr(self.name) if self.name is None else f'test {i}'
+        is_cls = issubclass(self.expected, Exception)
+        expected_t = self.expected if is_cls else type(self.expected)
+        try:
+            result = parse(inp)
+        except expected_t as e:
+            if is_cls:
+                return
+            if e.args == self.expected.args:
+                return
+            print(f"Unexpected error occurred in {name}; "
+                  f"was expecting args {self.expected.args}, got args {e.args!r}",
+                  file=sys.stderr, end="\n\n")
+            raise
+        except Exception as e:
+            print(f"Unexpected error occurred in {name}; "
+                  f"was expecting {self.expected}, got {e!r}",
+                  file=sys.stderr, end="\n\n")
+            raise
+        else:
+            raise TestFailed(f"Was expecting error in {name} but got no error;"
+                             f" return value was {result}")
+
+    def run(self, i: int):
+        if self.want_error:
+            self.run_errors(i)
+        else:
+            self.run_normal(i)
+
+
+ptest = _ParserTestCase
+
 PARSER_TESTS = [
+    ptest("Test basic assignment")
+    .input('a =0x9b \n$y.12=  "ab\\x64\\"" \n   some="b\\\\x"\n  $ls.42 = 0b10101')
+    .result(
+        [["setVar:to:", "a", 0x9b],
+         ["setLine:ofList:to:", 12, "$y", 'abd"'],
+         ['setVar:to:', 'some', 'b\\x'],
+         ['setLine:ofList:to:', 42, '$ls', 0b10101]
+         ]),
     (
         'a =0x9b \n$y.12=  "ab\\x64\\"" \n   some="b\\\\x"\n  $ls.42 = 0b10101',
         [["setVar:to:", "a", 0x9b],
@@ -68,7 +159,11 @@ PARSER_TESTS = [
 
 
 def test():
-    for i, (s, out) in enumerate(PARSER_TESTS):
+    for i, v in enumerate(PARSER_TESTS):
+        if isinstance(v, _ParserTestCase):
+            v.run(i)
+            continue
+        s, out = v
         try:
             expect(parse(s)).to_be(out)
         except TestFailed:
