@@ -176,17 +176,8 @@ PARSER_TESTS += [
 
 def test():
     for i, v in enumerate(PARSER_TESTS):
-        if isinstance(v, _ParserTestCase):
-            v.run(i)
-            continue
-        s, out = v
-        try:
-            expect(parse(s)).to_be(out)
-        except TestFailed:
-            raise
-        except Exception:
-            print(f"Error occurred in test {i}:", file=sys.stderr)
-            raise
+        v.run(i)
+        continue
 
 
 test()
