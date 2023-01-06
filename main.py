@@ -119,28 +119,24 @@ PARSER_TESTS = [
          ["setLine:ofList:to:", 12, "$y", 'abd"'],
          ['setVar:to:', 'some', 'b\\x'],
          ['setLine:ofList:to:', 42, '$ls', 0b10101]
-         ]),
-    (
-        'a =0x9b \n$y.12=  "ab\\x64\\"" \n   some="b\\\\x"\n  $ls.42 = 0b10101',
-        [["setVar:to:", "a", 0x9b],
-         ["setLine:ofList:to:", 12, "$y", 'abd"'],
-         ['setVar:to:', 'some', 'b\\x'],
-         ['setLine:ofList:to:', 42, '$ls', 0b10101]
          ]
     ),
-    (
-        'some  = @+(0o27, @-(0x3b, 0b11))\n   @deleteLine:ofList:(@/(18, 0h2), "ls")',
+    ptest()
+    .input('some  = @+(0o27, @-(0x3b, 0b11))\n   @deleteLine:ofList:(@/(18, 0h2), "ls")')
+    .result(
         [["setVar:to:", "some", ["+", 0o27, ["-", 0x3b, 0b11]]],
-         ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
+             ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
     ),
-    (
-        '  value = 23 + 8\n $ls.7= 12+6-3-1+2\n\n@deleteLine:ofList:(3+@/(1-(9+7), 2))',
+    ptest()
+    .input('  value = 23 + 8\n $ls.7= 12+6-3-1+2\n\n@deleteLine:ofList:(3+@/(1-(9+7), 2))')
+    .result(
         [["setVar:to:", "value", ["+", 23, 8]],
          ["setLine:ofList:to:", 7, "$ls", ['+', ['-', ['-', ['+', 12, 6], 3], 1], 2]],
          ['deleteLine:ofList:', ['+', 3, ['/', ['-', 1, ['+', 9, 7]], 2]]]]
     ),
-    (
-        '$q.10 = 11 * 8 / (3+2*7) / 2 * 7 - 8 / @rounded(12.8 + 2*7.2) - 3',
+    ptest()
+    .input('$q.10 = 11 * 8 / (3+2*7) / 2 * 7 - 8 / @rounded(12.8 + 2*7.2) - 3')
+    .result(
         [["setLine:ofList:to:", 10, "$q", [
             "-", [
                 "-", [
