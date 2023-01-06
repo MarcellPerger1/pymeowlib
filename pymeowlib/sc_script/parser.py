@@ -422,7 +422,9 @@ class Parser:
         self.expr_res = Block(self.op_name, *self._handle_op_args(self.op_args_str))
 
     def _handle_op_args(self, op_args_str):
-        pr = ParenSubst(op_args_str).subst()
+        # todo pass args without enclosing parens to this function
+        #  so that `ParenSubst` can be unified so that all parens are subst-ed
+        pr = ParenSubst(op_args_str, subst_outer=False).subst()
         arg_strs = [s.strip() for s in pr.new[1:-1].split(',')]
         ret = []
         for arg in arg_strs:
