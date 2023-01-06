@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import sys
 from typing import Any
 
@@ -80,14 +81,22 @@ class _ParserTestCase:
     def run_errors(self, i: int):
         inp = self.inp
         name = repr(self.name) if self.name is None else f'test {i}'
-        is_cls = issubclass(self.expected, Exception)
+        is_cls = inspect.isclass(self.expected)
         expected_t = self.expected if is_cls else type(self.expected)
         try:
             result = parse(inp)
         except expected_t as e:
+            e: Exception
             if is_cls:
                 return
             if e.args == self.expected.args:
+                return
+            if len(e.args) == 1 and len(self.expected.args) == 1:
+                if self.expected.args[0] not in e.args[0]:
+                    print(f"Unexpected error occurred in {name}; "
+                          f"was expecting args containing "
+                          f"{self.expected.args[0]!r}, got args {e.args[0]!r}",
+                          file=sys.stderr, end="\n\n")
                 return
             print(f"Unexpected error occurred in {name}; "
                   f"was expecting args {self.expected.args}, got args {e.args!r}",
@@ -151,6 +160,17 @@ PARSER_TESTS = [
             ], 3
         ]]]
     )
+]
+PARSER_TESTS += [
+    ptest('Tests invalid LHS')
+    .input('3 = 4')
+    .error(SyntaxError("Invalid LHS of assignment")),
+    ptest('Test invalid list LHS')
+    .input('$w.7o = 4')
+    .error(SyntaxError("Invalid LHS of assignment")),
+    ptest('No extra tokens after raw op')
+    .input('@rounded(2.2) 123')
+    .error(SyntaxError("Unexpected extra tokens after raw op"))
 ]
 
 
