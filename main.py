@@ -67,7 +67,7 @@ class _ParserTestCase:
 
     def run_normal(self, i: int):
         inp = self.inp
-        name = repr(self.name) if self.name is None else f'test {i}'
+        name = repr(self.name) if self.name is not None else f'test {i}'
         try:
             expect(parse(inp)).to_be(self.expected)
         except TestFailed:
@@ -121,20 +121,20 @@ PARSER_TESTS = [
          ['setLine:ofList:to:', 42, '$ls', 0b10101]
          ]
     ),
-    ptest()
+    ptest('Test raw operations')
     .input('some  = @+(0o27, @-(0x3b, 0b11))\n   @deleteLine:ofList:(@/(18, 0h2), "ls")')
     .result(
         [["setVar:to:", "some", ["+", 0o27, ["-", 0x3b, 0b11]]],
-             ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
+         ["deleteLine:ofList:", ["/", 18, 0x2], "ls"]]
     ),
-    ptest()
+    ptest('Test + and -')
     .input('  value = 23 + 8\n $ls.7= 12+6-3-1+2\n\n@deleteLine:ofList:(3+@/(1-(9+7), 2))')
     .result(
         [["setVar:to:", "value", ["+", 23, 8]],
          ["setLine:ofList:to:", 7, "$ls", ['+', ['-', ['-', ['+', 12, 6], 3], 1], 2]],
          ['deleteLine:ofList:', ['+', 3, ['/', ['-', 1, ['+', 9, 7]], 2]]]]
     ),
-    ptest()
+    ptest('Test all operators')
     .input('$q.10 = 11 * 8 / (3+2*7) / 2 * 7 - 8 / @rounded(12.8 + 2*7.2) - 3')
     .result(
         [["setLine:ofList:to:", 10, "$q", [
