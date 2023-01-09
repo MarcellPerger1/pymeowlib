@@ -160,7 +160,10 @@ PARSER_TESTS = [
                 ]]]
             ], 3
         ]]]
-    )
+    ),
+    ptest('Test string escapes')
+    .input(r'v ="x1b:\x1b; n=\n; t=\t; backslash=\\; quot=\""')
+    .result([["setVar:to:", "v", "x1b:\x1b; n=\n; t=\t; backslash=\\; quot=\""]])
 ]
 PARSER_TESTS += [
     ptest('Tests invalid LHS')
