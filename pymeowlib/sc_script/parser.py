@@ -210,10 +210,9 @@ class ParenMatcher:
 
 
 class ParenSubst:
-    def __init__(self, text: str, pm: ParenMatcher = None, subst_outer=True):
+    def __init__(self, text: str, pm: ParenMatcher = None):
         self.text = text
         self.par_contents: 'Optional[list[tuple[str, int, int]]]' = None
-        self.subst_outer = subst_outer
         self.pm = pm
         if self.pm is None:
             self.pm = ParenMatcher(self.text)
@@ -232,21 +231,15 @@ class ParenSubst:
             self.new = self.text
             return
         self.new = ''
-        par_end = 0 if not self.subst_outer else -1
+        par_end = -1
         for i, (t, start, end) in enumerate(self.pm.out):
-            if i == 0 and not self.subst_outer:
-                self.new += self.text[:start + 1]
-                continue
             if start <= par_end:
                 continue
             self.new += (self.text[par_end + 1:start]
                          + PAR_REPL.make(len(self.par_contents)))
             self.par_contents.append((self.text[start:end + 1], start, end))
             par_end = end
-        if self.subst_outer:
-            self.end = len(self.text) - 1
-        else:
-            self.end = self.pm.out[0][2]
+        self.end = len(self.text) - 1
         self.new += self.text[par_end + 1:self.end+1]
 
     def replace_into(self, text: str):
@@ -393,7 +386,7 @@ class Parser:
         else:
             op_to_name: dict[str, str] = {i: i for i in ops}
         ops_set = set(op_to_name)
-        ps = ParenSubst(expr, subst_outer=True).subst()
+        ps = ParenSubst(expr).subst()
         ps_result = ps.new
         if ops_set.isdisjoint(ps_result):
             return False  # no operators of this level in `expr`
@@ -426,7 +419,7 @@ class Parser:
     def _handle_op_args(self, op_args_str):
         # todo pass args without enclosing parens to this function
         #  so that `ParenSubst` can be unified so that all parens are subst-ed
-        pr = ParenSubst(op_args_str, subst_outer=True).subst()
+        pr = ParenSubst(op_args_str).subst()
         arg_strs = [s.strip() for s in pr.new.split(',')]
         ret = []
         for arg in arg_strs:
