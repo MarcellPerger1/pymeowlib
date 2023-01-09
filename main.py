@@ -65,6 +65,7 @@ class _ParserTestCase:
 
     def with_name(self, name: str):
         self.name = name
+        return self
 
     def run_normal(self, i: int):
         inp = self.inp
