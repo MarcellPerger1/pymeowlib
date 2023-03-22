@@ -179,9 +179,10 @@ PARSER_TESTS += [
 
 
 def test():
+    i = 0
     for i, v in enumerate(PARSER_TESTS):
         v.run(i)
-        continue
+    print(f"All tests {i} passed!")
 
 
 test()

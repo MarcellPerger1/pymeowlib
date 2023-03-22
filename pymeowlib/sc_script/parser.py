@@ -121,7 +121,7 @@ class StrReplacer:
     def __init__(self, s: str):
         self.orig = s
         self.new: Optional[str] = None
-        self.strings: 'list[str]' = []
+        self.strings: list[str] = []
 
     def replace(self):
         self.new = STR_RE.sub(self.replacer, self.orig)
@@ -135,16 +135,16 @@ class StrReplacer:
 
 
 class ParenMatcher:
-    paren_types = ['()', '[]', '{}']
-    open_parens = {s[0]: s[1] for s in paren_types}
-    close_parens = {s[1]: s[0] for s in paren_types}
-
-    def __init__(self, s: str, sort_by: str = None, reverse=False):
+    def __init__(self, s: str, sort_by: str = None, 
+                 reverse=False, paren_types=('()', '[]', '{}')):
         self.orig = s.rstrip()
         self.sort_by = sort_by
         self.reverse = reverse
         self.finished = False
         self.consumed_all = None
+        self.paren_types = paren_types
+        self.open_parens = {s[0]: s[1] for s in self.paren_types}
+        self.close_parens = {s[1]: s[0] for s in self.paren_types}
 
     def sort(self, by: str = None, reverse=False):
         self.sort_by = by
@@ -159,7 +159,7 @@ class ParenMatcher:
         return self
 
     def _match(self):
-        self.out: 'list[tuple[str, int, int]]' = []
+        self.out: list[tuple[str, int, int]] = []
         self.paren_stack = []
         self.i = 0
         while self.i < len(self.orig) and not self.finished:
@@ -210,12 +210,12 @@ class ParenMatcher:
 
 
 class ParenSubst:
-    def __init__(self, text: str, pm: ParenMatcher = None):
+    def __init__(self, text: str, pm: ParenMatcher = None, paren_types=('()',)):
         self.text = text
-        self.par_contents: 'Optional[list[tuple[str, int, int]]]' = None
+        self.par_contents: Optional[list[tuple[str, int, int]]] = None
         self.pm = pm
         if self.pm is None:
-            self.pm = ParenMatcher(self.text)
+            self.pm = ParenMatcher(self.text, paren_types=paren_types)
         self.pm.match(sort='start')
 
     def subst(self):
@@ -292,6 +292,23 @@ class Parser:
             self.smt = self.expr_res
             return
         raise SyntaxError(f"Invalid statement: {self.line!r}")
+
+    def _handle_blocks(self):
+        if self._handle_if():
+            return True
+
+    def _handle_if(self):
+        if not(self.line.startswith('if') and not self.line[2].isalnum()):
+            return False
+        rest_of_line = self.line[2:]
+        ps = ParenSubst(rest_of_line).subst()
+        condition, after_cond = ps.new.split('{', 1)
+        if after_cond.strip():
+            raise NotImplementedError("Statement on same line as if has not been implemented yet")
+        # todo think this through, how should this work?
+        # ...
+        
+        
 
     def _handle_assign(self):
         self.assign_sides = [s.strip() for s in self.line.split('=')]
