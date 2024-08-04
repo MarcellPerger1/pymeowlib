@@ -1,5 +1,9 @@
 # Block ids
 
+This is for Scratch 2.0 (from https://en.scratch-wiki.info/wiki/Scratch_File_Format_(2.0)/Block_Selectors).  
+The ids for Scratch 3.0 are ALL different (see https://en.scratch-wiki.info/wiki/List_of_Block_Opcodes).
+
+
 ## Math
 | Selector              | Block                                                                                           |
 |-----------------------|-------------------------------------------------------------------------------------------------|
